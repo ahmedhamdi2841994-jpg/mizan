@@ -1,0 +1,17 @@
+{
+	"appId": "com.mizan.personal",
+	"appName": "ميزان",
+	"webDir": "www",
+	"android": {
+		"allowMixedContent": false,
+		"backgroundColor": "#0b0d10"
+	},
+	"plugins": {
+		"CapacitorHttp": {
+			"enabled": true
+		},
+		"LocalNotifications": {
+			"iconColor": "#FF7A2F"
+		}
+	}
+}
