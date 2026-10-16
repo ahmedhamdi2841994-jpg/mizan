@@ -212,6 +212,7 @@ registerView('today', {title: {ar: 'اليوم', en: 'Today'}, icon: 'today', re
     <div class="card"><div class="head"><div><div class="eyebrow">${L('على مواقيت', 'Prayer times for')} ${esc(cityLabel())}${nextP && isToday ? ' · ' + L('الصلاة الجاية', 'Next') + ': ' + pName(nextP) + ' ' + m2t(pt[nextP]) : ''}</div><h2>${L('جدول اليوم', 'Today’s plan')}</h2></div><span class="muted small num">${sched.filter(x => d.sched?.[x.k]).length} / ${sched.length}</span></div><div class="timeline">${tl}</div></div>
   </div>
   ${typeof womenTodayCard === 'function' ? womenTodayCard() : ''}
+  ${typeof lifeTodayCard === 'function' ? lifeTodayCard() : ''}
   ${k.length ? `<div class="kpis">${k.map(x => `<div class="kpi"><div class="l">${x[0]}</div><div class="v">${x[1]}</div><div class="s ${x[3] || ''}">${x[2]}</div>${x[4] ? '<canvas id="spark"></canvas>' : ''}</div>`).join('')}</div>` : ''}
   <div class="two">
     <div class="card"><div class="head"><h2>${L('التنبيهات', 'Alerts')}</h2><button class="btn ghost sm" type="button" data-v="health">${L('كل التفاصيل', 'Details')}</button></div><div class="alerts">${alertsHTML(ev.A.slice(0, 3))}</div></div>

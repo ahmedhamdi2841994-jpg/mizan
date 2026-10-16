@@ -27,7 +27,8 @@ registerView('settings', {title: {ar: 'الإعدادات', en: 'Settings'}, ico
       <div><div class="eyebrow">${L('النسخة', 'Edition')}</div><div class="seg" style="margin-top:6px"><button type="button" data-ed="men" aria-pressed="${s.edition === 'men'}">${L('رجالي', 'Men')}</button><button type="button" data-ed="women" aria-pressed="${s.edition === 'women'}">${L('حريمي', 'Women')}</button></div></div>
       <div><div class="eyebrow">${L('اللغة', 'Language')}</div><div class="seg" style="margin-top:6px"><button type="button" data-lang="ar" aria-pressed="${LANG === 'ar'}">العربية</button><button type="button" data-lang="en" aria-pressed="${LANG === 'en'}">English</button></div></div>
       <div><div class="eyebrow">${L('الشكل', 'Theme')}</div><div class="seg" style="margin-top:6px"><button type="button" data-theme="dark" aria-pressed="${s.theme === 'dark'}">${L('داكن', 'Dark')}</button><button type="button" data-theme="light" aria-pressed="${s.theme === 'light'}">${L('فاتح', 'Light')}</button></div></div>
-      <label class="row"><input type="checkbox" class="tick" id="setSound" ${s.sound ? 'checked' : ''}> ${L('أصوات التطبيق', 'App sounds')}</label></div>
+      <label class="row"><input type="checkbox" class="tick" id="setSound" ${s.sound ? 'checked' : ''}> ${L('أصوات التطبيق', 'App sounds')}</label>
+      ${s.edition === 'men' ? `<label class="row"><input type="checkbox" class="tick" id="setShowW" ${s.showWomen ? 'checked' : ''}> ${L('إظهار قسم صحة المرأة (لمتابعة الدورة أو الحمل للزوجة)', 'Show the women’s health section (to follow your wife’s cycle or pregnancy)')}</label>` : ''}</div>
     <div class="card form"><h2>${L('المكان والمواعيد', 'Location & schedule')}</h2>
       <div class="fgrid"><label class="f">${L('المدينة', 'City')}<select id="setCity">${city}<option value="custom" ${s.city === 'custom' ? 'selected' : ''}>${L('مكان تاني', 'Other')}</option></select></label>
       ${s.city === 'custom' ? `<label class="f">${L('خط العرض', 'Latitude')}<input type="number" step="0.0001" id="setLat" value="${s.lat}"></label><label class="f">${L('خط الطول', 'Longitude')}<input type="number" step="0.0001" id="setLng" value="${s.lng}"></label><label class="f">${L('فرق التوقيت', 'UTC offset')}<input type="number" step="0.5" id="setTz" value="${s.tz}"></label>` : ''}
@@ -55,7 +56,7 @@ registerView('settings', {title: {ar: 'الإعدادات', en: 'Settings'}, ico
     <div class="card"><div class="head"><h2>${L('مسح البيانات', 'Erase data')}</h2></div><p class="muted small" style="margin-top:0">${L('بيمسح كل حاجة. مفيش رجوع.', 'Erases everything. No undo.')}</p>
       <div class="row"><button class="btn danger" type="button" id="wipe">${L('امسح كل البيانات', 'Erase all data')}</button><span id="wipeC" hidden><button class="btn danger" type="button" id="wipeYes">${L('أيوه، امسح', 'Yes, erase')}</button></span></div></div>
   </div>
-  <p class="muted small">${L('ميزان · الإصدار 1.0 · نص المصحف من QuranEnc عن طريق quran-json (CC BY 4.0) · مواقيت الصلاة بطريقة أم القرى.', 'Mizan · v1.0 · Mushaf text from QuranEnc via quran-json (CC BY 4.0) · Prayer times by the Umm al-Qura method.')}</p>`;
+  <p class="muted small">${L('ميزان · الإصدار 2.0 · نص المصحف من QuranEnc عن طريق quran-json (CC BY 4.0) · مواقيت الصلاة بطريقة أم القرى.', 'Mizan · v2.0 · Mushaf text from QuranEnc via quran-json (CC BY 4.0) · Prayer times by the Umm al-Qura method.')}</p>`;
 }});
 function applyTheme(){ document.documentElement.dataset.theme = S.settings.theme; const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = S.settings.theme === 'light' ? '#f3f4f6' : '#0b0d10'; }
 on('click', async e => {
@@ -74,6 +75,7 @@ on('click', async e => {
 on('change', async e => {
   const T = e.target, s = S.settings;
   if (T.id === 'setSound') { s.sound = T.checked; store.save(); return true; }
+  if (T.id === 'setShowW') { s.showWomen = T.checked; store.save(); renderNav(); render(); rescheduleAll(); toast(T.checked ? L('قسم صحة المرأة ظهر في القايمة', 'Women’s health is now in the menu') : L('اتخفى', 'Hidden')); return true; }
   if (T.id === 'setCity') { s.city = T.value; const c = CITIES.find(x => x[0] === T.value); if (c) { s.lat = c[3]; s.lng = c[4]; s.tz = c[5]; s.cityName = c[1]; } store.save(); render(); rescheduleAll(); return true; }
   if (['setLat', 'setLng', 'setTz'].includes(T.id)) { s[{setLat: 'lat', setLng: 'lng', setTz: 'tz'}[T.id]] = +T.value; store.save(); rescheduleAll(); return true; }
   if (T.id === 'setGym') { s.gymTime = T.value; store.save(); rescheduleAll(); return true; }
@@ -104,7 +106,7 @@ on('click', e => {
 
 /* ---------- boot ---------- */
 (function boot(){
-  store.load(); LANG = S.settings.lang || 'ar'; applyLang(); applyTheme(); updateWomen();
+  store.load(); LANG = S.settings.lang || 'ar'; applyLang(); applyTheme(); updateWomen(); LIFE(); try { womenAutoShop(); } catch (e) {} if (LIFE().focus.run) focusTick();
   try { const v = localStorage.getItem('mizan-view'); if (v && VIEWS[v]) VIEW = v; } catch (e) {}
   if (!visibleView(VIEW)) VIEW = 'today';
   renderNav(); render();
@@ -112,7 +114,7 @@ on('click', e => {
   setTimeout(() => { $('#splash').classList.add('out'); setTimeout(() => $('#splash').remove(), 600); if (!S.onboarded) onboarding(); }, reduceMotion ? 200 : 1300);
   $('#timerStop').onclick = () => { clearInterval(timerT); $('#timer').hidden = true; };
   setTimeout(rescheduleAll, 1500);
-  const App = window.Capacitor?.Plugins?.App; if (App) { App.addListener('appStateChange', st => { if (st.isActive) { CUR = todayISO(); render(); rescheduleAll(); } }); App.addListener('backButton', () => { if (!$('#sheet').hidden) closeSheet(); else if (VIEW !== 'today') go('today'); else App.exitApp(); }); }
+  const App = window.Capacitor?.Plugins?.App; if (App) { App.addListener('appStateChange', st => { if (st.isActive) { CUR = todayISO(); try { womenAutoShop(); } catch (e) {} render(); rescheduleAll(); } }); App.addListener('backButton', () => { if (!$('#sheet').hidden) closeSheet(); else if (VIEW !== 'today') go('today'); else App.exitApp(); }); }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && CUR !== todayISO() && daysBetween(CUR, todayISO()) === 1) { CUR = todayISO(); render(); } });
   if ('serviceWorker' in navigator && !isNative() && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();

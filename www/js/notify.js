@@ -27,6 +27,7 @@ function reminderPlan(days = 5){
     });
     if (n.water) for (let m = 8 * 60 + 30; m <= 22 * 60; m += Math.max(30, n.waterEvery || 90)) push('water-' + m, m, L('اشرب كوباية مية 💧', 'Drink a glass of water 💧'), L('ودوس على الكوباية في صفحة الأكل', 'Then tap a glass on the Meals page'), 'water');
     if (typeof womenReminders === 'function') womenReminders(iso, push);
+    if (typeof lifeReminders === 'function') lifeReminders(iso, push);
   }
   return out.sort((a, b) => a.when - b.when);
 }
@@ -42,7 +43,7 @@ async function scheduleNative(){
     const adhanCh = file ? 'adhan-' + file.replace(/\W/g, '_') : 'adhan-default';
     await ln.createChannel({id: adhanCh, name: L('الأذان', 'Adhan') + (file ? ' · ' + (ADHANS.find(a => a.file === file)?.name || file) : ''), importance: 5, vibration: true, ...(file ? {sound: file} : {})});
     const pend = await ln.getPending(); if (pend.notifications.length) await ln.cancel({notifications: pend.notifications.map(n => ({id: n.id}))});
-    const list = reminderPlan(5).slice(0, 400).map(r => ({id: hashId(r.key), title: r.title, body: r.body || ' ', channelId: r.kind === 'adhan' ? adhanCh : r.kind, schedule: {at: r.when, allowWhileIdle: true}, extra: {kind: r.kind}}));
+    const list = reminderPlan(5).slice(0, 480).map(r => ({id: hashId(r.key), title: r.title, body: r.body || ' ', channelId: r.kind === 'adhan' ? adhanCh : r.kind, schedule: {at: r.when, allowWhileIdle: true}, extra: {kind: r.kind}}));
     if (list.length) await ln.schedule({notifications: list});
     S.lastScheduled = Date.now(); store.save();
     return list.length;
@@ -63,11 +64,12 @@ setInterval(() => {
 }, 20000);
 async function playAdhan(test){
   const a = $('#player'), sel = S.settings.notify.adhan;
+  if (typeof musicDuck === 'function') musicDuck();
   try {
     if (sel === 'custom') { const blob = await idb.get('adhan-custom'); if (blob) { a.src = URL.createObjectURL(blob); await a.play(); return; } }
     const f = ADHANS.find(x => x.file === sel); if (f) { a.src = 'adhan/' + f.file; await a.play(); return; }
   } catch (e) {}
-  beep(660, .4, 3); if (test) toast(L('مفيش صوت أذان متضاف، فاشتغل صوت تنبيه. ضيف ملف أذان من الإعدادات.', 'No adhan file added, so a tone played. Add an adhan file below.'));
+  beep(660, .4, 3); if (typeof musicUnduck === 'function') setTimeout(musicUnduck, 2500); if (test) toast(L('مفيش صوت أذان متضاف، فاشتغل صوت تنبيه. ضيف ملف أذان من الإعدادات.', 'No adhan file added, so a tone played. Add an adhan file below.'));
 }
 async function rescheduleAll(){ if (isNative()) return scheduleNative(); scheduleWeb(); return webPlan.length; }
 
@@ -84,7 +86,7 @@ registerView('notify', {title: {ar: 'التنبيهات', en: 'Reminders'}, icon
       ${tog('meals', L('مواعيد الأكل والسناكس', 'Meals and snacks'))}
       ${tog('water', L('شرب المية', 'Drinking water'))}
       <label class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span>${L('المية كل', 'Water every')}</span><select data-nnum="waterEvery" style="width:auto">${[60, 90, 120].map(v => `<option value="${v}" ${n.waterEvery === v ? 'selected' : ''}>${v} ${L('دقيقة', 'min')}</option>`).join('')}</select></label>
-      ${tog('tea', L('الشاي', 'Tea'))}${tog('gym', L('الجيم', 'Gym'))}${tog('weigh', L('وزن الصبح', 'Morning weigh-in'))}${tog('course', L('الكورسات', 'Courses'))}${tog('prep', L('تجهيز الأكل', 'Food prep'))}${tog('sleep', L('ميعاد النوم', 'Bedtime'))}
+      ${tog('tasks', L('مهام المفكرة', 'Planner tasks'))}${tog('meds', L('مواعيد الأدوية', 'Medicine doses'))}${tog('events', L('المناسبات والتجديدات', 'Occasions & renewals'))}${tog('shop', L('المشتريات', 'Shopping'))}${tog('bills', L('الفواتير الشهرية', 'Monthly bills'))}${tog('habits', L('العادات', 'Habits'))}${tog('fasting', L('الصيام والسحور', 'Fasting & suhoor'))}${tog('khatma', L('ورد الختمة', 'Khatma portion'))}${tog('journal', L('اليوميات (10 بالليل)', 'Journal (10 PM)'))}${tog('tea', L('الشاي', 'Tea'))}${tog('gym', L('الجيم', 'Gym'))}${tog('weigh', L('وزن الصبح', 'Morning weigh-in'))}${tog('course', L('الكورسات', 'Courses'))}${tog('prep', L('تجهيز الأكل', 'Food prep'))}${tog('sleep', L('ميعاد النوم', 'Bedtime'))}
     </div>
     <div class="form">
       <div class="card"><div class="head"><h2>${L('صوت الأذان', 'Adhan voice')}</h2></div>

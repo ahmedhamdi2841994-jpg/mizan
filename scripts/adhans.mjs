@@ -14,3 +14,15 @@ files.forEach((f, i) => {
 });
 fs.writeFileSync(path.join(root, 'www', 'data', 'adhans.json'), JSON.stringify(list, null, 1));
 console.log(`${list.length} adhan voice(s) bundled`);
+
+// Nasheeds: anything in the /nasheed folder plays in the app's background player.
+const nsrc = path.join(root, 'nasheed'), nweb = path.join(root, 'www', 'nasheed');
+fs.mkdirSync(nweb, {recursive: true});
+const nlist = [];
+(fs.existsSync(nsrc) ? fs.readdirSync(nsrc).filter(f => /\.(mp3|ogg|m4a|aac|wav)$/i.test(f)).sort() : []).forEach((f, i) => {
+  const file = `nasheed_${i + 1}${path.extname(f).toLowerCase()}`;
+  fs.copyFileSync(path.join(nsrc, f), path.join(nweb, file));
+  nlist.push({file, name: path.basename(f, path.extname(f)).replace(/[_-]+/g, ' ')});
+});
+fs.writeFileSync(path.join(root, 'www', 'data', 'nasheeds.json'), JSON.stringify(nlist, null, 1));
+console.log(`${nlist.length} nasheed(s) bundled`);

@@ -36,7 +36,7 @@ function applyLang(){
 
 /* ---------- state ---------- */
 const DEF_SETTINGS = { lang: 'ar', theme: 'dark', edition: 'men', city: 'turaif', lat: 31.6725, lng: 38.6637, tz: 3, cityName: 'طريف', asr: 1, ishaRamadan: true, workEnd: '16:00', gymTime: '16:30', courseDays: [0,1,2,3,4], courseTime: '20:30',
-  notify: { prayer: true, preAdhan: 10, adhkar: true, meals: true, water: true, waterEvery: 90, tea: true, gym: true, sleep: true, weigh: true, prep: true, course: true, adhan: 'default' }, newsSources: null, sound: true };
+  notify: { prayer: true, preAdhan: 10, adhkar: true, meals: true, water: true, waterEvery: 90, tea: true, gym: true, sleep: true, weigh: true, prep: true, course: true, adhan: 'default', tasks: true, meds: true, events: true, shop: true, bills: true, habits: true, fasting: true, khatma: true, journal: false }, newsSources: null, sound: true };
 const DEF_PROFILE = { name: '', sex: 'm', age: 32, height: 187.5, weight: 95, goal: 80, act: 1.45, gymdays: 5, def: 700, start: todayISO(), conds: ['ibd', 'steroids'], allergies: 'لاكتوز، بيض' };
 let S = { settings: {...DEF_SETTINGS}, profile: {...DEF_PROFILE}, days: {}, labs: [], games: {}, quran: {}, adhkar: {}, women: {}, onboarded: false };
 const LS = 'mizan-app-v1';
@@ -116,6 +116,15 @@ const IC = {
   games: '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r="1"/><circle cx="18" cy="13.5" r="1"/>',
   women: '<circle cx="12" cy="8" r="5"/><path d="M12 13v8M9 18h6"/>',
   more: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  planner: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/>',
+  shop: '<path d="M3 4h2l2.4 11h11l2-8H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+  money: '<rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/><path d="M6 9.5v.01M18 15.5v.01"/>',
+  pill: '<rect x="3" y="9" width="18" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.5 8.5l5 7"/>',
+  events: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>',
+  habits: '<path d="M4 12l5 5L20 6"/><path d="M4 6h6M4 20h16"/>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  zakat: '<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>'
 };
 const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k] || IC.more}</svg>`;
@@ -126,12 +135,13 @@ let VIEW = 'today';
 function registerView(id, def){ VIEWS[id] = def; }
 const NAV_GROUPS = [
   {g: {ar: 'يومي', en: 'Daily'}, ids: ['today', 'workout', 'meals', 'log']},
-  {g: {ar: 'الإيمان', en: 'Faith'}, ids: ['prayer', 'adhkar', 'quran']},
-  {g: {ar: 'المعرفة والتسلية', en: 'Mind & fun'}, ids: ['library', 'news', 'games']},
+  {g: {ar: 'حياتي', en: 'My life'}, ids: ['planner', 'shop', 'money', 'meds', 'events', 'habits']},
+  {g: {ar: 'الإيمان', en: 'Faith'}, ids: ['prayer', 'adhkar', 'tasbeeh', 'quran', 'khatma', 'hijri', 'zakat']},
+  {g: {ar: 'المعرفة والتسلية', en: 'Mind & fun'}, ids: ['nasheed', 'library', 'news', 'games']},
   {g: {ar: 'المتابعة', en: 'Tracking'}, ids: ['women', 'insights', 'health', 'plan', 'notify', 'settings']}
 ];
 const BOTTOM = ['today', 'workout', 'meals', 'prayer'];
-function visibleView(id){ const v = VIEWS[id]; return v && (!v.women || S.settings.edition === 'women'); }
+function visibleView(id){ const v = VIEWS[id]; return v && (!v.women || S.settings.edition === 'women' || !!S.settings.showWomen); }
 function renderNav(){
   let h = '';
   NAV_GROUPS.forEach(gr => { const ids = gr.ids.filter(visibleView); if (!ids.length) return; h += `<div class="grp">${esc(LX(gr.g))}</div>` + ids.map(id => `<button type="button" data-v="${id}" ${VIEW === id ? 'aria-current="page"' : ''}>${icon(VIEWS[id].icon)}<span>${esc(LX(VIEWS[id].title))}</span></button>`).join(''); });
