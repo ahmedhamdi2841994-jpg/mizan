@@ -1,0 +1,155 @@
+/* ميزان — قاعدة الأكل: القيم لكل 100 جم (نيء للحوم والسمك إلا لو مكتوب مطبوخ). المصدر: جداول USDA والقيم الشائعة للأكل المصري والسعودي.
+   [ar, en, kcal, protein, carbs, fat, unit, gramsPerUnit, tags, cost 1-3] */
+'use strict';
+const FOOD = {};
+const FD = (id, ar, en, k, p, c, f, u, gpu, tags, cost) => { FOOD[id] = {id, ar, en, k, p, c, f, u: u || 'g', gpu: gpu || 1, tags: new Set((tags || '').split(' ').filter(Boolean)), cost: cost || 1}; };
+/* proteins */
+FD('chicken', 'صدور فراخ', 'Chicken breast', 120, 22.5, 0, 2.6, 'graw', 1, 'keto lean', 1);
+FD('thigh', 'أوراك فراخ من غير جلد', 'Skinless chicken thighs', 145, 19, 0, 7.5, 'graw', 1, 'keto', 1);
+FD('mince', 'لحمة مفرومة قليلة الدهن', 'Lean minced beef', 176, 20, 0, 10, 'graw', 1, 'keto redmeat satfat purine', 2);
+FD('steak', 'ستيك لحم', 'Beef steak', 160, 21, 0, 8, 'graw', 1, 'keto redmeat purine', 2);
+FD('lamb', 'لحم ضاني قليل الدهن', 'Lean lamb', 205, 20, 0, 13.5, 'graw', 1, 'keto redmeat satfat purine', 3);
+FD('liver', 'كبدة بقري', 'Beef liver', 135, 20.4, 3.9, 3.6, 'graw', 1, 'organ purine redmeat', 1);
+FD('tilapia', 'بلطي', 'Tilapia fillet', 96, 20, 0, 1.7, 'graw', 1, 'fish keto lean', 1);
+FD('hamour', 'هامور أو بياض', 'Grouper / white fish', 92, 19.4, 0, 1, 'graw', 1, 'fish keto lean', 2);
+FD('salmon', 'سلمون', 'Salmon', 208, 20, 0, 13, 'graw', 1, 'fish keto omega', 3);
+FD('shrimp', 'جمبري', 'Shrimp', 85, 20, 0.5, 0.5, 'graw', 1, 'seafood keto purine', 3);
+FD('tuna', 'تونة بالمية مصفاة', 'Tuna in water, drained', 116, 26, 0, 1, 'g', 1, 'fish keto lean', 1);
+FD('sardine', 'سردين معلب مصفى', 'Canned sardines, drained', 208, 24.6, 0, 11.5, 'g', 1, 'fish keto purine omega salty', 1);
+FD('egg', 'بيض', 'Eggs', 143, 12.6, 0.7, 9.5, 'pc', 55, 'egg keto', 1);
+FD('eggw', 'بياض بيض', 'Egg whites', 52, 11, 0.7, 0.2, 'pc', 33, 'egg lean', 1);
+FD('greek', 'زبادي يوناني خالي الدسم', 'Non-fat Greek yogurt', 59, 10, 3.6, 0.4, 'g', 1, 'lactose', 2);
+FD('yogurt', 'زبادي قليل الدسم', 'Low-fat yogurt', 63, 5.3, 7, 1.6, 'g', 1, 'lactose', 1);
+FD('lfyog', 'زبادي خالي اللاكتوز', 'Lactose-free yogurt', 63, 5.3, 7, 1.6, 'g', 1, '', 2);
+FD('milk', 'لبن قليل الدسم', 'Low-fat milk', 42, 3.4, 5, 1, 'ml', 1, 'lactose', 1);
+FD('lfmilk', 'لبن خالي اللاكتوز', 'Lactose-free milk', 42, 3.4, 5, 1, 'ml', 1, '', 2);
+FD('soymilk', 'حليب صويا', 'Soy milk', 33, 2.9, 1.8, 1.6, 'ml', 1, 'soy', 2);
+FD('cottage', 'جبنة قريش', 'Cottage cheese (areesh)', 72, 12.4, 2.7, 1, 'g', 1, 'lactose lean', 1);
+FD('feta', 'جبنة بيضا', 'White cheese (feta)', 264, 14, 4, 21, 'g', 1, 'lactose keto salty satfat', 1);
+FD('halloumi', 'جبنة حلوم', 'Halloumi', 321, 21, 2, 25, 'g', 1, 'lactose keto salty satfat', 2);
+FD('cheddar', 'جبنة شيدر (قديمة)', 'Cheddar (aged)', 403, 25, 1.3, 33, 'g', 1, 'keto salty satfat tyramine', 2);
+FD('labneh', 'لبنة', 'Labneh', 170, 6, 4, 14, 'g', 1, 'lactose keto satfat', 1);
+FD('lentil', 'عدس مطبوخ', 'Cooked lentils', 116, 9, 20, 0.4, 'g', 1, 'legume fodmap', 1);
+FD('ful', 'فول مدمس', 'Ful medames (fava)', 110, 7.6, 19.7, 0.4, 'g', 1, 'legume fodmap fava', 1);
+FD('chickpea', 'حمص مسلوق', 'Cooked chickpeas', 164, 8.9, 27.4, 2.6, 'g', 1, 'legume fodmap', 1);
+FD('hummus', 'حمص بالطحينة', 'Hummus', 166, 7.9, 14.3, 9.6, 'g', 1, 'legume fodmap sesame', 1);
+FD('tofu', 'توفو', 'Firm tofu', 144, 17, 3, 9, 'g', 1, 'soy keto', 3);
+/* carbs */
+FD('rice', 'رز أبيض مطبوخ', 'Cooked white rice', 130, 2.7, 28, 0.3, 'g', 1, 'gi_high', 1);
+FD('brice', 'رز بني مطبوخ', 'Cooked brown rice', 123, 2.7, 25.6, 1, 'g', 1, '', 2);
+FD('pasta', 'مكرونة مطبوخة', 'Cooked pasta', 158, 5.8, 31, 0.9, 'g', 1, 'gluten fodmap', 1);
+FD('potato', 'بطاطس مسلوقة أو في الفرن', 'Boiled or baked potato', 87, 1.9, 20, 0.1, 'g', 1, 'highK gi_high', 1);
+FD('sweetp', 'بطاطا', 'Sweet potato', 90, 2, 20.7, 0.2, 'g', 1, 'highK', 1);
+FD('oats', 'شوفان', 'Oats (dry)', 379, 13, 67.7, 6.5, 'g', 1, 'fiber', 1);
+FD('baladi', 'عيش بلدي', 'Baladi bread', 266, 9.8, 55, 2.6, 'pc', 100, 'gluten fiber fodmap', 1);
+FD('pita', 'خبز عربي', 'Arabic bread', 275, 9, 55.7, 1.2, 'pc', 70, 'gluten gi_high fodmap', 1);
+FD('toast', 'توست أسمر', 'Brown toast', 265, 11, 46, 3.5, 'pc', 28, 'gluten fodmap', 1);
+FD('gfbread', 'عيش خالي من الجلوتين', 'Gluten-free bread', 250, 4, 48, 5, 'pc', 35, '', 3);
+FD('ricecake', 'كعك أرز', 'Rice cakes', 387, 8, 81, 3, 'pc', 9, 'gi_high', 1);
+FD('bulgur', 'برغل مطبوخ', 'Cooked bulgur', 83, 3.1, 18.6, 0.2, 'g', 1, 'gluten fiber fodmap', 1);
+FD('quinoa', 'كينوا مطبوخة', 'Cooked quinoa', 120, 4.4, 21.3, 1.9, 'g', 1, '', 3);
+FD('freekeh', 'فريك مطبوخ', 'Cooked freekeh', 110, 4.5, 21, 0.8, 'g', 1, 'gluten fiber fodmap', 2);
+/* fruit */
+FD('banana', 'موز', 'Banana', 89, 1.1, 22.8, 0.3, 'pc', 120, 'highK', 1);
+FD('apple', 'تفاح', 'Apple', 52, 0.3, 13.8, 0.2, 'pc', 180, 'fodmap', 1);
+FD('orange', 'برتقال', 'Orange', 47, 0.9, 11.8, 0.1, 'pc', 150, 'citrus highK', 1);
+FD('dates', 'تمر', 'Dates', 282, 2.5, 75, 0.4, 'pc', 10, 'sugar highK gi_high', 1);
+FD('straw', 'فراولة', 'Strawberries', 32, 0.7, 7.7, 0.3, 'g', 1, 'keto', 2);
+FD('berries', 'توت', 'Berries', 50, 0.8, 12, 0.3, 'g', 1, 'keto', 3);
+FD('grapes', 'عنب', 'Grapes', 69, 0.7, 18, 0.2, 'g', 1, '', 1);
+FD('kiwi', 'كيوي', 'Kiwi', 61, 1.1, 14.7, 0.5, 'pc', 75, '', 2);
+FD('guava', 'جوافة', 'Guava', 68, 2.6, 14.3, 1, 'pc', 100, '', 1);
+FD('melon', 'شمام', 'Cantaloupe', 34, 0.8, 8.2, 0.2, 'g', 1, '', 1);
+FD('watermelon', 'بطيخ', 'Watermelon', 30, 0.6, 7.6, 0.2, 'g', 1, 'fodmap', 1);
+/* vegetables */
+FD('cucumber', 'خيار', 'Cucumber', 15, 0.7, 3.6, 0.1, 'g', 1, 'keto veg', 1);
+FD('tomato', 'طماطم', 'Tomato', 18, 0.9, 3.9, 0.2, 'g', 1, 'keto veg tomato highK', 1);
+FD('lettuce', 'خس', 'Lettuce', 15, 1.4, 2.9, 0.2, 'g', 1, 'keto veg vitK', 1);
+FD('carrot', 'جزر', 'Carrots', 41, 0.9, 9.6, 0.2, 'g', 1, 'veg', 1);
+FD('zucchini', 'كوسة', 'Zucchini', 17, 1.2, 3.1, 0.3, 'g', 1, 'keto veg', 1);
+FD('spinach', 'سبانخ', 'Spinach', 23, 2.9, 3.6, 0.4, 'g', 1, 'keto veg vitK highK oxalate', 1);
+FD('molokhia', 'ملوخية', 'Molokhia', 34, 4.7, 5.8, 0.3, 'g', 1, 'keto veg vitK', 1);
+FD('broccoli', 'بروكلي', 'Broccoli', 34, 2.8, 6.6, 0.4, 'g', 1, 'keto veg vitK', 2);
+FD('beans', 'فاصوليا خضرا', 'Green beans', 31, 1.8, 7, 0.2, 'g', 1, 'keto veg', 1);
+FD('okra', 'بامية', 'Okra', 33, 1.9, 7.5, 0.2, 'g', 1, 'keto veg', 1);
+FD('pepper', 'فلفل رومي', 'Bell pepper', 31, 1, 6, 0.3, 'g', 1, 'keto veg', 1);
+FD('cauli', 'قرنبيط', 'Cauliflower', 25, 1.9, 5, 0.3, 'g', 1, 'keto veg fodmap', 1);
+FD('eggplant', 'باذنجان', 'Eggplant', 25, 1, 5.9, 0.2, 'g', 1, 'keto veg', 1);
+FD('salad', 'سلطة خضرا', 'Green salad', 18, 1, 3.6, 0.2, 'g', 1, 'keto veg', 1);
+FD('mixveg', 'خضار مشكل', 'Mixed vegetables', 40, 2, 8, 0.3, 'g', 1, 'veg', 1);
+/* fats */
+FD('oil', 'زيت زيتون', 'Olive oil', 884, 0, 0, 100, 'tsp', 4.5, 'keto fat', 1);
+FD('ghee', 'سمنة', 'Ghee', 900, 0, 0, 100, 'tsp', 4.5, 'keto fat satfat', 1);
+FD('butter', 'زبدة', 'Butter', 717, 0.9, 0.1, 81, 'tsp', 5, 'keto fat satfat lactose', 1);
+FD('tahini', 'طحينة', 'Tahini', 595, 17, 21, 54, 'tbsp', 15, 'sesame fat keto', 1);
+FD('pb', 'زبدة فول سوداني', 'Peanut butter', 588, 25, 20, 50, 'tbsp', 16, 'peanut fat', 2);
+FD('almond', 'لوز', 'Almonds', 579, 21, 22, 50, 'g', 1, 'nuts fat keto oxalate', 2);
+FD('walnut', 'عين جمل', 'Walnuts', 654, 15, 14, 65, 'g', 1, 'nuts fat keto omega', 3);
+FD('avocado', 'أفوكادو', 'Avocado', 160, 2, 8.5, 14.7, 'g', 1, 'fat keto highK fodmap', 3);
+FD('olives', 'زيتون', 'Olives', 115, 0.8, 6, 10.7, 'g', 1, 'fat keto salty', 1);
+FD('honey', 'عسل نحل', 'Honey', 304, 0.3, 82, 0, 'tsp', 7, 'sugar fodmap', 1);
+/* tags helpers */
+const FTAG_L = {lactose: ['ألبان باللاكتوز', 'Dairy with lactose'], egg: ['بيض', 'Eggs'], gluten: ['قمح وجلوتين', 'Gluten'], fish: ['سمك', 'Fish'], seafood: ['مأكولات بحرية', 'Shellfish'], nuts: ['مكسرات', 'Tree nuts'], peanut: ['فول سوداني', 'Peanuts'], sesame: ['سمسم وطحينة', 'Sesame'], soy: ['صويا', 'Soy'], legume: ['بقوليات', 'Legumes'], fava: ['فول', 'Fava beans'], redmeat: ['لحوم حمرا', 'Red meat'], organ: ['كبدة', 'Liver']};
+const ALLERGENS = ['lactose', 'egg', 'gluten', 'fish', 'seafood', 'nuts', 'peanut', 'sesame', 'soy'];
+const DISLIKES = ['legume', 'fish', 'redmeat', 'organ', 'egg', 'seafood'];
+/* dishes: s = slots, c = cuisine (eg/sa/x), parts: [food, role, base grams or units], how = method */
+const DISH = [];
+const DS = (id, ar, en, s, c, parts, how, extra) => DISH.push({id, ar, en, s: s.split(' '), c, parts, how, ...(extra || {})});
+/* breakfast */
+DS('ful_bread', 'فول مدمس بزيت الزيتون + عيش بلدي + سلطة', 'Ful medames with olive oil + baladi bread + salad', 'b', 'eg', [['ful', 'p', 200], ['baladi', 'c', 1], ['salad', 'v', 100], ['oil', 'f', 2]], ['سخّن الفول بالكمون والليمون، وزيت الزيتون في الآخر.', 'Warm the ful with cumin and lemon; add olive oil at the end.']);
+DS('eggs_bread', 'بيض مسلوق + عيش + خيار وطماطم', 'Boiled eggs + bread + cucumber & tomato', 'b', 'x', [['egg', 'p', 2], ['eggw', 'p', 2], ['baladi', 'c', 1], ['cucumber', 'v', 100], ['tomato', 'v', 80]], ['اسلق البيض 9 دقايق.', 'Boil the eggs for 9 minutes.']);
+DS('omelette', 'أومليت بالخضار + توست', 'Vegetable omelette + toast', 'b', 'x', [['egg', 'p', 2], ['eggw', 'p', 3], ['pepper', 'v', 60], ['spinach', 'v', 40], ['toast', 'c', 2], ['oil', 'f', 1]], ['اخفق البيض وسوّي الخضار في طاسة بمعلقة زيت.', 'Whisk the eggs and cook with the veg in a pan with a spoon of oil.']);
+DS('oats_milk', 'شوفان باللبن والموز', 'Oats with milk and banana', 'b', 'x', [['oats', 'c', 60], ['milk', 'p', 250], ['greek', 'p', 100], ['banana', 'c', 1]], ['اطبخ الشوفان باللبن 3 دقايق، وضيف الزبادي والموز.', 'Cook the oats in milk for 3 minutes; top with yogurt and banana.'], {swap: {milk: 'lfmilk', greek: 'lfyog'}});
+DS('yog_bowl', 'زبادي يوناني بالتوت والشوفان', 'Greek yogurt with berries and oats', 'b n', 'x', [['greek', 'p', 200], ['berries', 'v', 100], ['oats', 'c', 30], ['honey', 'x', 1]], ['قلّب كله في طبق.', 'Mix everything in a bowl.'], {swap: {greek: 'lfyog'}});
+DS('cottage_bread', 'جبنة قريش بالطماطم + عيش', 'Cottage cheese with tomato + bread', 'b', 'eg', [['cottage', 'p', 200], ['tomato', 'v', 100], ['baladi', 'c', 1], ['oil', 'f', 1]], ['قريش بطماطم مقطعة وزيت زيتون ورشة كمون.', 'Cottage cheese with diced tomato, olive oil and a pinch of cumin.'], {swap: {cottage: 'lfyog'}});
+DS('labneh_bread', 'لبنة وزيتون وبيض + خبز', 'Labneh, olives, eggs + bread', 'b', 'sa', [['egg', 'p', 2], ['labneh', 'f', 40], ['olives', 'f', 20], ['pita', 'c', 1], ['cucumber', 'v', 100]], ['فطار سعودي خفيف.', 'A light Saudi-style breakfast.']);
+DS('tuna_toast', 'تونة على توست', 'Tuna on toast', 'b n', 'x', [['tuna', 'p', 100], ['toast', 'c', 2], ['cucumber', 'v', 80], ['oil', 'f', 1]], ['تونة مصفاة بليمون وشبت على التوست.', 'Drained tuna with lemon and dill on toast.']);
+DS('keto_eggs', 'بيض بالجبنة والأفوكادو', 'Eggs with cheese and avocado', 'b', 'x', [['egg', 'p', 3], ['feta', 'f', 30], ['avocado', 'f', 70], ['spinach', 'v', 60]], ['بيض في طاسة بالسبانخ والجبنة، والأفوكادو على الجنب.', 'Eggs in a pan with spinach and cheese; avocado on the side.'], {keto: 1});
+DS('halloumi_plate', 'حلوم مشوي وخضار', 'Grilled halloumi with veg', 'b', 'sa', [['halloumi', 'p', 80], ['egg', 'p', 1], ['cucumber', 'v', 100], ['tomato', 'v', 80], ['olives', 'f', 20]], ['شوي الحلوم في طاسة من غير زيت.', 'Grill the halloumi in a dry pan.'], {keto: 1});
+DS('tofu_scramble', 'توفو بالخضار + توست', 'Tofu scramble + toast', 'b', 'x', [['tofu', 'p', 150], ['pepper', 'v', 60], ['spinach', 'v', 50], ['toast', 'c', 2], ['oil', 'f', 1]], ['فتّت التوفو في الطاسة مع الخضار وكركم.', 'Crumble tofu into the pan with veg and turmeric.']);
+/* main meals */
+DS('chk_rice', 'صدور فراخ مشوية + رز + سلطة', 'Grilled chicken + rice + salad', 'l d', 'x', [['chicken', 'p', 180], ['rice', 'c', 200], ['salad', 'v', 150], ['oil', 'f', 2]], ['تتبيلة: ليمون وبابريكا وكمون، في الفرن 200 درجة 25 دقيقة.', 'Marinate in lemon, paprika and cumin; bake at 200°C for 25 minutes.']);
+DS('chk_potato', 'صينية فراخ بالبطاطس والجزر', 'Chicken, potato & carrot tray bake', 'l d', 'eg', [['chicken', 'p', 180], ['potato', 'c', 250], ['carrot', 'v', 100], ['oil', 'f', 2]], ['كله مكعبات في صينية بالبهارات، 200 درجة 35 دقيقة.', 'Cube everything into one tray with spices; 200°C for 35 minutes.']);
+DS('kabsa', 'كبسة فراخ', 'Chicken kabsa', 'l d', 'sa', [['chicken', 'p', 180], ['rice', 'c', 220], ['carrot', 'v', 60], ['tomato', 'v', 60], ['oil', 'f', 2]], ['الرز في مرقة الفراخ مع بهارات الكبسة والطماطم، والفراخ في الفرن.', 'Rice cooked in chicken stock with kabsa spices and tomato; chicken roasted.']);
+DS('mandi', 'مندي فراخ من غير جلد', 'Skinless chicken mandi', 'l d', 'sa', [['thigh', 'p', 180], ['rice', 'c', 200], ['salad', 'v', 120]], ['من المطعم أو في البيت، شيل الجلد وكمية الرز محسوبة.', 'From a restaurant or home; remove the skin and measure the rice.']);
+DS('fish_rice', 'سمك فيليه في الفرن + رز', 'Oven fish fillet + rice', 'l d', 'eg', [['tilapia', 'p', 250], ['rice', 'c', 200], ['zucchini', 'v', 120], ['oil', 'f', 2]], ['الفيليه في فويل بليمون وكمون، 200 درجة 18 دقيقة.', 'Fillet in foil with lemon and cumin; 200°C for 18 minutes.']);
+DS('sayadeya', 'صيادية سمك', 'Sayadeya (fish with spiced rice)', 'l d', 'eg', [['hamour', 'p', 250], ['rice', 'c', 200], ['salad', 'v', 120], ['oil', 'f', 2]], ['رز بني بالكمون، والسمك مشوي فوقه.', 'Cumin-spiced rice with grilled fish on top.']);
+DS('salmon_potato', 'سلمون في الفرن + بطاطس', 'Baked salmon + potatoes', 'l d', 'x', [['salmon', 'p', 160], ['potato', 'c', 250], ['broccoli', 'v', 120]], ['السلمون بملح وفلفل وليمون، 15 دقيقة في الفرن.', 'Salmon with salt, pepper and lemon; 15 minutes in the oven.']);
+DS('shrimp_rice', 'جمبري مشوي + رز', 'Grilled shrimp + rice', 'l d', 'x', [['shrimp', 'p', 220], ['rice', 'c', 200], ['salad', 'v', 120], ['oil', 'f', 2]], ['الجمبري في طاسة سخنة 3 دقايق بالثوم والليمون.', 'Shrimp in a hot pan for 3 minutes with garlic and lemon.']);
+DS('steak_potato', 'ستيك + بطاطس في الفرن', 'Steak + oven potatoes', 'l d', 'x', [['steak', 'p', 180], ['potato', 'c', 250], ['salad', 'v', 120], ['oil', 'f', 1]], ['الستيك في طاسة سخنة جدًا 3–4 دقايق لكل جنب، وسيبه يرتاح 5 دقايق.', 'Sear the steak 3–4 minutes per side in a very hot pan; rest 5 minutes.']);
+DS('kofta_rice', 'كفتة مشوية + رز + سلطة', 'Grilled kofta + rice + salad', 'l d', 'x', [['mince', 'p', 160], ['rice', 'c', 180], ['salad', 'v', 150]], ['اللحمة بالبقدونس والبهارات أصابع في الفرن 20 دقيقة.', 'Mince with parsley and spices shaped into fingers; oven 20 minutes.']);
+DS('liver_rice', 'كبدة + رز', 'Beef liver + rice', 'l d', 'eg', [['liver', 'p', 180], ['rice', 'c', 200], ['pepper', 'v', 80], ['oil', 'f', 2]], ['شرايح رفيعة في الطاسة 5 دقايق بالكمون.', 'Thin slices in a pan for 5 minutes with cumin.']);
+DS('lamb_freekeh', 'لحم ضاني بالفريك', 'Lamb with freekeh', 'l d', 'sa', [['lamb', 'p', 150], ['freekeh', 'c', 200], ['salad', 'v', 120]], ['اللحم مسلوق بالبهارات والفريك في المرقة.', 'Lamb simmered with spices; freekeh cooked in the broth.']);
+DS('molokhia_chk', 'ملوخية + فراخ + رز', 'Molokhia + chicken + rice', 'l d', 'eg', [['chicken', 'p', 170], ['molokhia', 'v', 200], ['rice', 'c', 180], ['oil', 'f', 2]], ['الملوخية في مرقة الفراخ، والتقلية بمعلقة زيت بس.', 'Molokhia in chicken stock; fry the garlic in just a spoon of oil.']);
+DS('pasta_chk', 'مكرونة بالفراخ والخضار', 'Pasta with chicken and veg', 'l d', 'x', [['chicken', 'p', 170], ['pasta', 'c', 220], ['pepper', 'v', 80], ['zucchini', 'v', 80], ['oil', 'f', 2]], ['المكرونة مسلوقة مع فراخ وخضار في الطاسة.', 'Boiled pasta tossed with pan-cooked chicken and veg.']);
+DS('okra_meat', 'بامية باللحمة + رز', 'Okra with beef + rice', 'l d', 'eg', [['steak', 'p', 150], ['okra', 'v', 200], ['rice', 'c', 180], ['tomato', 'v', 80]], ['اللحمة مسلوقة والبامية في صلصة طماطم خفيفة.', 'Boiled beef with okra in a light tomato sauce.']);
+DS('bulgur_chk', 'فراخ مشوية + برغل', 'Grilled chicken + bulgur', 'l d', 'sa', [['chicken', 'p', 180], ['bulgur', 'c', 220], ['salad', 'v', 150], ['oil', 'f', 2]], ['البرغل بالمرقة 15 دقيقة.', 'Bulgur simmered in stock for 15 minutes.']);
+DS('tuna_potato', 'تونة + بطاطس مسلوقة + خيار', 'Tuna + boiled potatoes + cucumber', 'l d', 'x', [['tuna', 'p', 150], ['potato', 'c', 250], ['cucumber', 'v', 120], ['oil', 'f', 2]], ['من غير طبخ لو البطاطس مسلوقة من قبل.', 'No cooking if the potatoes are pre-boiled.']);
+DS('sweetp_chk', 'فراخ + بطاطا في الفرن', 'Chicken + baked sweet potato', 'l d', 'x', [['chicken', 'p', 180], ['sweetp', 'c', 250], ['beans', 'v', 120], ['oil', 'f', 2]], ['البطاطا في الفرن 35 دقيقة، والفراخ آخر 25.', 'Sweet potato in the oven for 35 minutes, chicken for the last 25.']);
+DS('quinoa_salmon', 'سلمون + كينوا + سبانخ', 'Salmon + quinoa + spinach', 'l d', 'x', [['salmon', 'p', 150], ['quinoa', 'c', 200], ['spinach', 'v', 100]], ['الكينوا مسلوقة 15 دقيقة، والسلمون في الفرن.', 'Quinoa boiled 15 minutes; salmon in the oven.']);
+DS('lentil_soup', 'شوربة عدس + عيش + سلطة', 'Lentil soup + bread + salad', 'l d', 'eg', [['lentil', 'p', 350], ['baladi', 'c', 1], ['salad', 'v', 120], ['oil', 'f', 1]], ['عدس أصفر مع جزر وكمون، مسلوق ومخلوط.', 'Yellow lentils with carrot and cumin, cooked and blended.']);
+DS('koshari_lite', 'كشري خفيف', 'Light koshari', 'l d', 'eg', [['lentil', 'p', 200], ['rice', 'c', 150], ['pasta', 'c', 60], ['chickpea', 'p', 50], ['tomato', 'v', 100], ['oil', 'f', 1]], ['من غير تقلية بصل كتير وصلصة خفيفة.', 'Go easy on fried onions; light tomato sauce.']);
+DS('chickpea_rice', 'يخنة حمص + رز', 'Chickpea stew + rice', 'l d', 'x', [['chickpea', 'p', 220], ['rice', 'c', 150], ['spinach', 'v', 100], ['tomato', 'v', 80], ['oil', 'f', 1]], ['الحمص مع السبانخ في صلصة طماطم.', 'Chickpeas with spinach in tomato sauce.']);
+DS('tofu_rice', 'توفو بالخضار + رز', 'Tofu stir-fry + rice', 'l d', 'x', [['tofu', 'p', 200], ['rice', 'c', 180], ['mixveg', 'v', 150], ['oil', 'f', 2]], ['التوفو مكعبات في طاسة مع الخضار.', 'Cubed tofu stir-fried with veg.']);
+DS('egg_potato', 'بيض بالبطاطس', 'Eggs with potatoes', 'l d', 'eg', [['egg', 'p', 3], ['eggw', 'p', 2], ['potato', 'c', 250], ['salad', 'v', 120], ['oil', 'f', 1]], ['بطاطس في الفرن والبيض فوقها آخر 8 دقايق.', 'Bake the potatoes and crack the eggs on top for the last 8 minutes.']);
+/* keto mains */
+DS('keto_chk', 'فراخ بالكريمة والسبانخ (كيتو)', 'Creamy chicken with spinach (keto)', 'l d', 'x', [['thigh', 'p', 200], ['spinach', 'v', 120], ['cheddar', 'f', 30], ['oil', 'f', 3]], ['الأوراك في الطاسة بالزيت، والسبانخ والجبنة في الآخر.', 'Thighs in oil in a pan; add spinach and cheese at the end.'], {keto: 1});
+DS('keto_salmon', 'سلمون وأفوكادو وسلطة (كيتو)', 'Salmon, avocado & salad (keto)', 'l d', 'x', [['salmon', 'p', 180], ['avocado', 'f', 80], ['salad', 'v', 150], ['oil', 'f', 2]], ['سلمون في الفرن مع سلطة بزيت الزيتون.', 'Baked salmon with olive-oil salad.'], {keto: 1});
+DS('keto_steak', 'ستيك بالزبدة وكوسة (كيتو)', 'Butter steak with zucchini (keto)', 'l d', 'x', [['steak', 'p', 200], ['zucchini', 'v', 150], ['butter', 'f', 2], ['oil', 'f', 2]], ['الستيك في طاسة سخنة بالزبدة، والكوسة سوتيه.', 'Sear the steak in butter; sauté the zucchini.'], {keto: 1});
+DS('keto_kofta', 'كفتة بالطحينة وسلطة (كيتو)', 'Kofta with tahini & salad (keto)', 'l d', 'sa', [['mince', 'p', 180], ['tahini', 'f', 2], ['salad', 'v', 150], ['olives', 'f', 30]], ['كفتة في الفرن مع طحينة بالليمون.', 'Oven kofta with lemony tahini.'], {keto: 1});
+DS('keto_fish', 'سمك مشوي وبروكلي بزيت الزيتون (كيتو)', 'Grilled fish with broccoli (keto)', 'l d', 'eg', [['hamour', 'p', 250], ['broccoli', 'v', 150], ['oil', 'f', 4], ['almond', 'f', 15]], ['السمك مشوي والبروكلي مسلوق 4 دقايق بزيت زيتون.', 'Grill the fish; boil the broccoli for 4 minutes and dress with olive oil.'], {keto: 1});
+DS('keto_eggplant', 'باذنجان باللحمة المفرومة (كيتو)', 'Eggplant with minced beef (keto)', 'l d', 'eg', [['mince', 'p', 180], ['eggplant', 'v', 200], ['feta', 'f', 30], ['oil', 'f', 2]], ['الباذنجان شرايح في الفرن، واللحمة فوقه بالجبنة.', 'Roast the eggplant slices and top with mince and cheese.'], {keto: 1});
+/* snacks */
+DS('fruit_yog', 'زبادي وفاكهة', 'Yogurt with fruit', 'n', 'x', [['yogurt', 'p', 170], ['banana', 'c', 1]], ['', ''], {swap: {yogurt: 'lfyog'}});
+DS('dates_milk', 'تمر ولبن', 'Dates and milk', 'n', 'x', [['milk', 'p', 250], ['dates', 'c', 3]], ['سناك سريع قبل التمرين.', 'A quick pre-workout snack.'], {swap: {milk: 'lfmilk'}});
+DS('ricecake_pb', 'كعك أرز بزبدة الفول السوداني وموز', 'Rice cakes with peanut butter & banana', 'n', 'x', [['ricecake', 'c', 2], ['pb', 'f', 1], ['banana', 'c', 1]], ['', '']);
+DS('tuna_ricecake', 'تونة على كعك أرز', 'Tuna on rice cakes', 'n', 'x', [['tuna', 'p', 80], ['ricecake', 'c', 2], ['cucumber', 'v', 80]], ['', '']);
+DS('cottage_fruit', 'جبنة قريش وفاكهة', 'Cottage cheese & fruit', 'n', 'eg', [['cottage', 'p', 150], ['apple', 'c', 1]], ['', ''], {swap: {cottage: 'lfyog', apple: 'kiwi'}});
+DS('nuts_fruit', 'حفنة لوز وفاكهة', 'A handful of almonds & fruit', 'n', 'x', [['almond', 'f', 20], ['orange', 'c', 1]], ['', '']);
+DS('hummus_veg', 'حمص بالطحينة وخضار', 'Hummus with veg sticks', 'n', 'x', [['hummus', 'p', 100], ['carrot', 'v', 100], ['cucumber', 'v', 100]], ['', '']);
+DS('eggs_snack', 'بيضتين مسلوقين وخيار', 'Two boiled eggs & cucumber', 'n', 'x', [['egg', 'p', 2], ['cucumber', 'v', 120]], ['', ''], {keto: 1});
+DS('keto_snack', 'جبنة وزيتون ولوز (كيتو)', 'Cheese, olives & almonds (keto)', 'n', 'x', [['cheddar', 'p', 30], ['olives', 'f', 30], ['almond', 'f', 15]], ['', ''], {keto: 1});
+DS('banana_snack', 'موزة', 'A banana', 'n', 'x', [['banana', 'c', 1]], ['', '']);
+/* Ramadan */
+DS('iftar_main', 'فطار: تمرتين ومية، وبعد المغرب شوربة وفراخ ورز وسلطة', 'Iftar: 2 dates & water, then soup, chicken, rice & salad', 'if', 'x', [['dates', 'c', 2], ['lentil', 'p', 150], ['chicken', 'p', 150], ['rice', 'c', 150], ['salad', 'v', 150]], ['افطر على تمر ومية، صلّي المغرب، وبعدين كمّل أكلك.', 'Break the fast with dates and water, pray Maghrib, then eat.']);
+DS('suhoor_main', 'سحور: فول أو بيض + عيش + زبادي', 'Suhoor: ful or eggs + bread + yogurt', 'su', 'x', [['egg', 'p', 2], ['yogurt', 'p', 150], ['baladi', 'c', 1], ['cucumber', 'v', 100]], ['أكل بطيء الهضم ومية كتير، وقلّل الملح.', 'Slow-digesting food and plenty of water; go easy on salt.'], {swap: {yogurt: 'lfyog'}});

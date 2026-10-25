@@ -2,30 +2,26 @@
 'use strict';
 /* ---------- daily routine ---------- */
 function scheduleFor(iso){
-  const s = S.settings, dow = D(iso).getDay(), pt = prayerTimes(iso), gym = GYM.includes(dow) && !pregnantRest(), work = dow <= 4, fri = dow === 5;
-  const meals = MEALS[dow], gT = t2m(s.gymTime || '16:30');
+  const s = S.settings, p = S.profile || {}, dow = D(iso).getDay(), pt = prayerTimes(iso), gym = GYM.includes(dow), fri = dow === 5, gT = t2m(s.gymTime || '17:00'), plan = PROG[dow] || {};
+  const wake = t2m(p.wake || '07:00'), sleep = t2m(p.sleep || '23:00') < 360 ? t2m(p.sleep) + 1440 : t2m(p.sleep || '23:00');
   const it = [
-    ['fajr', pt.fajr, L('صلاة الفجر', 'Fajr prayer'), L('في المسجد + أذكار الصباح', 'At the mosque + morning adhkar'), 'prayer'],
-    ['wake', 420, L('صحيان', 'Wake up'), L('كوبايتين مية + شمس 10 دقايق', 'Two glasses of water + 10 min sunlight'), 'h'],
-    ['weigh', 425, L('الوزن', 'Weigh in'), L('بعد الحمام وقبل الأكل', 'After the bathroom, before food'), 'h'],
-    ['tea1', 600, L('كوباية الشاي الأولى', 'First cup of tea'), L('مع كعك أرز، مش على معدة فاضية', 'With a rice cake, not on an empty stomach'), 'h'],
+    ['fajr', pt.fajr, L('صلاة الفجر', 'Fajr prayer'), L('وأذكار الصباح', 'and the morning adhkar'), 'prayer'],
+    ['wake', wake, L('صحيان', 'Wake up'), L('كوبايتين مية + شمس 10 دقايق', 'Two glasses of water + 10 min sunlight'), 'h'],
+    p.weighDaily !== false ? ['weigh', wake + 5, L('الوزن', 'Weigh in'), L('بعد الحمام وقبل الأكل', 'After the bathroom, before food'), 'h'] : null,
     ['dhuhr', pt.dhuhr, fri ? L('صلاة الجمعة', 'Jumuah prayer') : L('صلاة الظهر', 'Dhuhr prayer'), fri ? L('بكّر واقرأ سورة الكهف', 'Go early and read Surat Al-Kahf') : '', 'prayer'],
-    ['meal1', 750, L('الوجبة الأولى', 'Meal 1'), LX(scaleMeal(meals.m1).n), 'meal'],
-    ['tea2', 870, L('كوباية الشاي التانية', 'Second cup of tea'), '', 'h'],
     ['asr', pt.asr, L('صلاة العصر', 'Asr prayer'), '', 'prayer'],
-    gym ? ['pre', gT - 20, L('سناك قبل الجيم + الشاي التالت', 'Pre-workout snack + third tea'), '', 'meal'] : ['tea3', 970, L('كوباية الشاي التالتة', 'Third cup of tea'), L('آخر شاي أحمر في اليوم', 'Last black tea of the day'), 'h'],
-    gym ? ['gym', gT, L('الجيم: ', 'Gym: ') + LX(PROG[dow].t), L('75 دقيقة تقريبًا', 'About 75 minutes'), 'gym'] : (dow === 4 || pregnantRest() && dow !== 5 ? ['gym', gT, L('مشي 30–45 دقيقة', 'Walk 30–45 min'), '', 'gym'] : null),
     ['maghrib', pt.maghrib, L('صلاة المغرب', 'Maghrib prayer'), '', 'prayer'],
-    ['meal2', Math.max(pt.maghrib + 15, gym ? gT + 95 : 0, 1080), L('الوجبة التانية', 'Meal 2'), LX(scaleMeal(meals.m2).n), 'meal'],
-    ['quran', pt.maghrib + 50, L('ورد القرآن', 'Daily Quran'), L('حوالي نص ساعة', 'About half an hour'), 'h'],
     ['isha', pt.isha, L('صلاة العشاء', 'Isha prayer'), '', 'prayer'],
-    ['ilm', pt.isha + 20, L('علم شرعي', 'Islamic study'), L('درس أو كتاب', 'A lesson or a book'), 'h'],
-    (s.courseDays || []).includes(dow) ? ['course', t2m(s.courseTime || '20:30'), L('الكورس', 'Course'), L('PMP / التخطيط · مع نعناع أو زنجبيل', 'PMP / Planning · with mint or ginger tea'), 'h'] : null,
-    ['night', 1350, L('سناك الليل', 'Night snack'), '', 'meal'],
-    fri ? null : ['prep', 1365, L('تجهيز أكل بكرة + قفل الشاشات', 'Prep tomorrow’s food + screens off'), '', 'h'],
-    ['sleep', 1395, L('النوم', 'Sleep'), L('أذكار النوم', 'Sleep adhkar'), 'h']
-  ].filter(Boolean).map(([k, m, n, sub, c]) => ({k, m, n, s: sub, c}));
-  return it.sort((a, b) => a.m - b.m);
+    plan.k && plan.k !== 'rest' ? ['gym', gT, (plan.k === 'walk' ? '' : L('التمرين: ', 'Training: ')) + LX(plan.t), plan.k === 'walk' ? '' : L(`حوالي ${Math.round(exMinutes(plan.ex) + 10)} دقيقة`, `About ${Math.round(exMinutes(plan.ex) + 10)} minutes`), 'gym'] : null,
+    p.faith !== false ? ['quran', pt.maghrib + 40, L('ورد القرآن', 'Daily Quran'), L('حوالي نص ساعة', 'About half an hour'), 'h'] : null,
+    p.faith !== false && p.ilm ? ['ilm', pt.isha + 20, L('علم شرعي', 'Islamic study'), L('درس أو كتاب', 'A lesson or a book'), 'h'] : null,
+    (s.courseDays || []).includes(dow) && s.courseOn !== false && (s.courseDays || []).length ? ['course', t2m(s.courseTime || '20:30'), L('الكورس', 'Course'), s.courseName || '', 'h'] : null,
+    p.prep !== false && !fri ? ['prep', sleep - 30, L('تجهيز أكل بكرة + قفل الشاشات', 'Prep tomorrow’s food + screens off'), '', 'h'] : null,
+    ['sleep', sleep, L('النوم', 'Sleep'), L('أذكار النوم', 'Sleep adhkar'), 'h']
+  ].filter(Boolean);
+  mealsFor(iso).forEach(m => it.push(['meal-' + m.key, t2m(m.t), m.title, LX(m.n), 'meal']));
+  const cups = +p.tea || 0; if (cups) { const ms = mealsFor(iso).map(m => t2m(m.t)); let t = wake + 150; for (let i = 0; i < cups && t < sleep - 240; i++) { while (ms.some(x => Math.abs(x - t) < 50)) t += 20; it.push(['tea' + (i + 1), t, L(`كوباية ${p.teaKind === 'coffee' ? 'القهوة' : 'الشاي'} ${['الأولى', 'التانية', 'التالتة', 'الرابعة', 'الخامسة'][i]}`, `${p.teaKind === 'coffee' ? 'Coffee' : 'Tea'} ${i + 1}`), L('بعيد عن الأكل بساعة', 'An hour away from meals'), 'h']); t += 210; } }
+  return it.map(([k, m, n, sub, c]) => ({k, m: ((m % 1440) + 1440) % 1440 < 180 && m >= 1440 ? m : m, n, s: sub, c})).sort((a, b) => a.m - b.m);
 }
 function pregnantRest(){ return false; }
 function prayersCount(iso, src){ const d = dayOf(iso, src); return PRAYER_KEYS.filter(k => d.sched?.[k]).length; }
@@ -40,23 +36,30 @@ function calc(src){
   const female = (src.settings?.edition || S.settings.edition) === 'women' || p.sex === 'f';
   const h = p.height, bmi = curW / ((h / 100) ** 2);
   const bmr = 10 * curW + 6.25 * h - 5 * p.age + (female ? -161 : 5), tdee = bmr * (p.act || 1.375);
-  const ibd = (p.conds || []).includes('ibd'); let def = +p.def || 0; if (ibd && def > 700) def = 700;
+  const ibd = (p.conds || []).includes('ibd'), hr = src === S && typeof healthRules === 'function' ? healthRules(p) : null;
+  let def = p.goalType ? ({lose: {slow: 300, mid: 500, fast: 750}[p.pace || 'mid'], recomp: 250, gain: -({slow: 250, mid: 350, fast: 500}[p.pace || 'mid']), strength: 0, fitness: 0, health: 0}[p.goalType] ?? 0) : (+p.def || 0);
+  if (ibd && def > 700) def = 700; if (hr && def > hr.maxDef) def = hr.maxDef; if (def > tdee * 0.25) def = Math.round(tdee * 0.25 / 50) * 50;
   const wm = src === S ? S.women || {} : {}; let extra = 0, mode = 'normal';
   if (female && wm.mode === 'pregnant') { def = 0; extra = wm.trimester === 3 ? 450 : wm.trimester === 2 ? 340 : 0; mode = 'pregnant'; }
   if (female && wm.mode === 'postpartum' && wm.breastfeeding) { def = Math.min(def, 300); extra = 400; mode = 'bf'; }
-  const floor = female ? 1300 : 1600, avgT = Math.max(floor, tdee - def + extra), g = Math.min(7, Math.max(0, p.gymdays ?? 4)), split = g > 0 && g < 7 && mode === 'normal';
+  const floor = (hr && hr.flags.has('u18')) ? (female ? 1600 : 2000) : female ? 1300 : 1500, avgT = Math.max(floor, tdee - def + extra), g = Math.min(7, Math.max(0, p.gymdays ?? 4)), split = g > 0 && g < 7 && mode === 'normal';
   const kTrain = r50(Math.max(floor, avgT + (split ? 100 : 0))), kRest = r50(Math.max(floor, avgT - (split ? 200 : 0)));
-  let protein = r5(Math.min((female ? 1.6 : 1.8) * curW, 2.2 * (p.goal || curW))); if (mode === 'pregnant') protein = r5(Math.max(75, 1.1 * curW)); if (mode === 'bf') protein = r5(Math.max(protein, 1.3 * curW));
+  const refW = bmi >= 30 ? 27 * (h / 100) ** 2 : curW, gk = {lose: 2.0, recomp: 2.0, gain: 1.8, strength: 1.8, fitness: 1.6, health: 1.3}[p.goalType] || null;
+  let protein = gk ? r5(gk * refW * (female ? 0.9 : 1)) : r5(Math.min((female ? 1.6 : 1.8) * curW, 2.2 * (p.goal || curW)));
+  if (p.diet === 'highprotein' && gk) protein = r5(Math.max(protein, 2.2 * refW * (female ? 0.9 : 1)));
+  if (hr && hr.proteinCap) protein = r5(Math.min(protein, hr.proteinCap * curW));
+  if (mode === 'pregnant') protein = r5(Math.max(75, 1.1 * curW)); if (mode === 'bf') protein = r5(Math.max(protein, 1.3 * curW));
   const water = Math.round(curW * 0.035 * 4) / 4 + (mode === 'pregnant' ? 0.3 : mode === 'bf' ? 0.7 : 0);
   let rate = null;
   if (last7.length >= 3 && prev7.length >= 3) rate = avg(prev7.map(x => x.w)) - avg(last7.map(x => x.w));
   else if (weights.length >= 5) { const sp = daysBetween(weights[0].d, weights.at(-1).d); if (sp >= 5) rate = (weights[0].w - weights.at(-1).w) / sp * 7; }
   const expRate = def * 7 / 7700, toGo = p.goal && mode === 'normal' ? curW - p.goal : null;
   const useRate = rate && rate > 0.1 ? rate : (expRate > 0.1 ? expRate : null);
-  const etaW = toGo !== null && toGo > 0 && useRate ? toGo / useRate : null, eta = etaW ? addDays(t, Math.round(etaW * 7)) : null;
+  const etaW = toGo !== null && toGo > 0 && useRate ? toGo / useRate : (toGo !== null && toGo < 0 && def < 0 ? -toGo / (-def * 7 / 7700) : null), eta = etaW ? addDays(t, Math.round(etaW * 7)) : null;
   const meas = dates.filter(d => num(src.days[d].waist) && num(src.days[d].neck));
   let bf = null, waist = null; if (meas.length) { const m = src.days[meas.at(-1)]; waist = num(m.waist); bf = bodyFat(p, m, female); }
-  return {curW, bmi, bmr, tdee, def, ibd, kTrain, kRest, protein, water, rate, expRate, eta, etaW, toGo, bf, waist, weights, floor, female, mode, startW: weights[0]?.w ?? p.weight};
+  const diet = typeof resolveDiet === 'function' && src === S ? resolveDiet(p, hr) : 'balanced', mT = typeof macroSplit === 'function' ? macroSplit(kTrain, protein, diet) : null, mR = typeof macroSplit === 'function' ? macroSplit(kRest, protein, diet) : null;
+  return {diet, mT, mR, curW, bmi, bmr, tdee, def, ibd, kTrain, kRest, protein, water, rate, expRate, eta, etaW, toGo, bf, waist, weights, floor, female, mode, startW: weights[0]?.w ?? p.weight};
 }
 function bodyFat(p, m, female){
   if (!m || !num(m.waist) || !num(m.neck) || !p.height) return null;
@@ -69,7 +72,7 @@ function scores(iso, src, c){
   const d = dayOf(iso, src), plan = planFor(iso);
   let wo = null;
   if (plan.ex.length) { let tot = 0, done = 0; plan.ex.forEach(e => { tot += e.sets; done += (d.wo?.[e.id] || []).slice(0, e.sets).filter(s => s && s.d).length; }); wo = tot ? done / tot : null; }
-  const ml = mealsFor(iso), meals = ml.filter(m => ['done', 'swap'].includes(d.meals?.[m.key]?.s)).length / ml.length;
+  const ml = mealsFor(iso), meals = ml.length ? ml.filter(m => ['done', 'swap'].includes(d.meals?.[m.key]?.s)).length / ml.length : null;
   const sc = scheduleFor(iso), hab = sc.filter(x => d.sched?.[x.k]).length / sc.length;
   c = c === undefined ? calc(src) : c; const wt = c ? Math.ceil(c.water / 0.25) : 12, water = Math.min(1, (d.water || 0) / wt);
   const parts = [wo, meals, hab, water].filter(v => v !== null), any = d.sched || d.meals || d.wo || d.water;
@@ -160,7 +163,7 @@ function fig(ex){
     if (a.t === 'db') shape = a.v ? '<rect class="wt" x="-4" y="-9" width="8" height="18" rx="2"/>' : '<rect class="wt" x="-9" y="-4" width="18" height="8" rx="2"/>';
     if (a.t === 'bar') shape = `<line class="bar" x1="${-a.w / 2}" y1="0" x2="${a.w / 2}" y2="0"/>`;
     if (a.t === 'handle') shape = '<circle class="wt" r="4"/>';
-    if (a.t === 'pad') shape = '<rect class="pad" x="-8" y="-4" width="16" height="8" rx="3"/>';
+    if (a.t === 'pad') shape = '<rect class="xpad" x="-8" y="-4" width="16" height="8" rx="3"/>';
     if (a.t === 'vpad') shape = '<line class="bar" x1="0" y1="-18" x2="0" y2="18"/>';
     if (a.t === 'plate') shape = '<circle class="wt" r="9"/>';
     const tr = (reduceMotion || (p1[0] === p2[0] && p1[1] === p2[1])) ? '' : `<animateTransform attributeName="transform" type="translate" values="${p1[0]} ${p1[1]};${p2[0]} ${p2[1]};${p1[0]} ${p1[1]}" dur="${dur}" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>`;
@@ -171,7 +174,7 @@ function fig(ex){
   const nk1 = front ? pt(A, 'sm') : A.sh, nk2 = front ? pt(B, 'sm') : B.sh;
   body += line(A.head, nk1, B.head, nk2, 'body');
   const head = `<circle class="head" cx="${A.head[0]}" cy="${A.head[1]}" r="9">${an('cx', A.head[0], B.head[0])}${an('cy', A.head[1], B.head[1])}</circle>`;
-  return `<svg viewBox="0 -14 200 150" role="img" aria-label="${esc(LANG === 'en' ? ex.en : ex.ar)}" style="direction:ltr"><style>.body{stroke:var(--ink);stroke-width:6;stroke-linecap:round}.head{fill:var(--ink)}.gr{stroke:var(--line);stroke-width:1.5}.eq{stroke:var(--ink-3);stroke-width:3;stroke-linecap:round}.eq.thick{stroke-width:7}.eqf{fill:var(--ink-3);opacity:.55}.cab{stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:3 3}.wt{fill:var(--fire)}.bar{stroke:var(--fire);stroke-width:5;stroke-linecap:round}.pad{fill:var(--fire-2);opacity:.9}</style>${eq}${att}${body}${head}${att2}</svg>`;
+  return `<svg viewBox="0 -14 200 150" role="img" aria-label="${esc(LANG === 'en' ? ex.en : ex.ar)}" style="direction:ltr"><style>.body{stroke:var(--ink);stroke-width:6;stroke-linecap:round}.head{fill:var(--ink)}.gr{stroke:var(--line);stroke-width:1.5}.eq{stroke:var(--ink-3);stroke-width:3;stroke-linecap:round}.eq.thick{stroke-width:7}.eqf{fill:var(--ink-3);opacity:.55}.cab{stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:3 3}.wt{fill:var(--fire)}.bar{stroke:var(--fire);stroke-width:5;stroke-linecap:round}.xpad{fill:var(--fire-2);opacity:.9}</style>${eq}${att}${body}${head}${att2}</svg>`;
 }
 
 /* ---------- views ---------- */
@@ -236,7 +239,8 @@ registerView('workout', {title: {ar: 'التمرين', en: 'Workout'}, icon: 'wo
   const iso = woDate(), dow = D(iso).getDay(), plan = planFor(iso), d = dayOf(iso), sc = scores(iso);
   const seg = [6, 0, 1, 2, 3, 4, 5].map(w => `<button type="button" data-wday="${w}" aria-pressed="${w === dow}">${WD()[w]}<span class="d">${esc(LX(PROG[w].t))}</span></button>`).join('');
   let body;
-  if (plan.k === 'rest') body = `<div class="card restday"><svg viewBox="0 0 120 120" width="110" height="110" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="var(--fire-soft)"/><path d="M74 36a28 28 0 1 0 10 34 24 24 0 0 1-10-34z" fill="var(--fire-2)"/></svg><h2>${L('يوم راحة كاملة', 'Full rest day')}</h2><p class="muted" style="max-width:46ch;margin:0">${L('العضل بيتبني في الراحة. صلاة الجمعة، والوجبة الحرة، ووقت مع الأهل.', 'Muscle grows while you rest. Jumuah, the free meal and family time.')}</p></div>`;
+  if (!S.plan?.train) body = `<div class="card empty"><p>${L('لسه معملتش خطتك. خلّي المعالج يبني برنامجك في دقيقتين.', 'You haven’t built your plan yet. Let the wizard build it in two minutes.')}</p><button class="btn fire" type="button" data-wiz="1">${L('ابني خطتي', 'Build my plan')}</button></div>`;
+  else if (plan.k === 'rest') body = `<div class="card restday"><svg viewBox="0 0 120 120" width="110" height="110" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="var(--fire-soft)"/><path d="M74 36a28 28 0 1 0 10 34 24 24 0 0 1-10-34z" fill="var(--fire-2)"/></svg><h2>${L('يوم راحة', 'Rest day')}</h2><p class="muted" style="max-width:46ch;margin:0">${L('العضل بيتبني في الراحة. نوم كويس، ومية، ومشي خفيف لو حابب.', 'Muscle grows while you rest. Good sleep, water, and an easy walk if you like.')}</p></div>`;
   else {
     const last = id => { const ds = Object.keys(S.days).filter(x => x < iso).sort().reverse(); for (const x of ds) { const sets = S.days[x].wo?.[id]; if (sets) { const kg = sets.map(s => num(s?.kg)).filter(v => v !== null); if (kg.length) return Math.max(...kg); } } return null; };
     body = `<div class="exgrid">${plan.ex.map((e, i) => {
@@ -245,8 +249,8 @@ registerView('workout', {title: {ar: 'التمرين', en: 'Workout'}, icon: 'wo
       return `<article class="card ex ${doneN === e.sets ? 'complete' : ''}"><div class="art">${fig(X)}<span class="idx" dir="ltr">${i + 1} / ${plan.ex.length}</span><span class="eq">${esc(LX({ar: X.eq[0], en: X.eq[1]}))}</span></div>
       <div class="bd"><h3>${esc(LANG === 'en' ? X.en : X.ar)}<small dir="ltr">${esc(LANG === 'en' ? X.ar : X.en)}</small></h3>
         <div class="meta"><span class="chip"><b dir="ltr">${e.sets} × ${esc(e.reps)}</b></span>${e.rest ? `<span class="chip">${L('راحة', 'Rest')} <b>${e.rest} ${L('ث', 's')}</b></span>` : ''}<span class="chip">${esc(LANG === 'en' ? X.mus[1] : X.mus[0])}</span><span class="chip ${doneN === e.sets ? 'ok' : ''}"><b>${fmt(doneN / e.sets * 100, 0)}%</b></span></div>
-        <p class="tip">${esc(LANG === 'en' ? X.tip[1] : X.tip[0])}</p><div class="sets">${rows}</div>
-        <div class="exfoot"><a class="link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(X.en + ' proper form')}" target="_blank" rel="noopener">${L('شوف الطريقة بالفيديو ↗', 'Watch the technique ↗')}</a>${lk !== null ? `<span class="muted">${L('أعلى وزن آخر مرة', 'Best last time')}: <b class="num">${lk}</b> ${L('كجم', 'kg')}</span>` : ''}</div></div></article>`; }).join('')}</div>`;
+        <p class="tip">${esc(LANG === 'en' ? X.tip[1] : X.tip[0])}</p>${X.sl && MISTAKES[X.sl] ? `<p class="muted small" style="margin:0">⚠️ ${L('أخطاء شائعة', 'Common mistakes')}: ${esc(LANG === 'en' ? MISTAKES[X.sl][1] : MISTAKES[X.sl][0])}</p>` : ''}<div class="sets">${rows}</div>
+        <div class="exfoot"><a class="link" href="${ytLink(X)}" target="_blank" rel="noopener">${L('شوف الشرح على يوتيوب ↗', 'Watch on YouTube ↗')}</a>${S.plan?.train ? `<button class="link" type="button" data-swapex="${dow}|${i}">${L('بدّل التمرين ⇄', 'Swap exercise ⇄')}</button>` : ''}${lk !== null ? `<span class="muted">${L('أعلى وزن آخر مرة', 'Best last time')}: <b class="num">${lk}</b> ${L('كجم', 'kg')}</span>` : ''}</div></div></article>`; }).join('')}</div>`;
   }
   const ph = plan.ph;
   return topbar(L('التمرين', 'Workout'), `${WD()[dow]} · ${dShort(iso)}`) + `
@@ -254,7 +258,8 @@ registerView('workout', {title: {ar: 'التمرين', en: 'Workout'}, icon: 'wo
   ${pregnant() ? `<div class="banner"><span>${L('أنتِ في وضع الحمل: الأوزان خفيفة، ومفيش تمارين على الضهر بعد الشهر الرابع، ووقّفي فورًا لو حسيتي بدوخة أو ألم أو نزيف. خدي موافقة دكتورتك على التمرين.', 'Pregnancy mode: keep weights light, no lying on your back after month 4, stop at once with dizziness, pain or bleeding. Get your obstetrician’s OK.')}</span></div>` : ''}
   <div class="card"><div class="row" style="justify-content:space-between"><div style="min-width:200px"><div class="eyebrow">${L('الأسبوع', 'Week')} ${plan.week} · ${L('المرحلة', 'Phase')} ${ph.c} ${L('من 12', 'of 12')}</div><h2>${esc(plan.title)} · ${esc(ph.n)}</h2></div>
     ${plan.ex.length ? `<div class="bar-prog"><i style="width:${(sc.wo || 0) * 100}%"></i></div><b class="num">${fmt((sc.wo || 0) * 100, 0)}%</b>` : ''}</div>
-    <p class="muted small" style="margin:10px 0 0">${esc(ph.d)} ${plan.k === 'strength' ? L('قبل التمرين: إحماء 10 دقايق. بعده: مشي بميل 15 دقيقة وإطالة 5 دقايق.', 'Before: 10 min warm-up. After: 15 min incline walk and 5 min stretching.') : ''} ${L('لو بطنك تعبانة أو خدت مضاد هيستامين: خفّف الأوزان 30% أو اكتفي بالمشي.', 'If your gut is upset or you took an antihistamine: drop weights 30% or just walk.')}</p></div>
+    <p class="muted small" style="margin:10px 0 0">${esc(ph.d)} ${['strength', 'cond'].includes(plan.k) ? L('قبل التمرين: إحماء 5–10 دقايق (مشي أو عجلة + حركات خفيفة). بعده: إطالة 5 دقايق.', 'Before: 5–10 min warm-up (walk or bike + light moves). After: 5 min stretching.') : ''} ${L('لو تعبان أو عيان: خفّف 30% أو اكتفي بالمشي.', 'If you feel unwell: drop 30% or just walk.')}</p>
+    ${S.plan?.train ? `<div class="row" style="margin-top:10px"><span class="muted small">${esc(LX(S.plan.train.name))}</span><span class="grow"></span><span class="seg"><button type="button" data-place="gym" aria-pressed="${S.profile.place === 'gym'}">🏋️ ${L('جيم', 'Gym')}</button><button type="button" data-place="home" aria-pressed="${S.profile.place === 'home'}">🏠 ${L('تمارين منزلية', 'Home workouts')}</button></span><button class="btn ghost sm" type="button" data-v="myplan">${L('تعديل البرنامج', 'Edit program')}</button></div>` : ''}</div>
   ${body}`;
 }});
 on('click', e => {
@@ -281,19 +286,20 @@ registerView('meals', {title: {ar: 'الأكل', en: 'Meals'}, icon: 'meals', re
     <div class="kpi"><div class="l">${L('السعرات', 'Calories')}</div><div class="v">${fmt(it.k, 0)} <small>/ ${tk ? fmt(tk, 0) : '—'}</small></div><div class="bar-prog" style="margin-top:8px"><i style="width:${tk ? Math.min(100, it.k / tk * 100) : 0}%"></i></div></div>
     <div class="kpi"><div class="l">${L('البروتين', 'Protein')}</div><div class="v">${fmt(it.p, 0)} <small>/ ${c ? c.protein : '—'} ${L('جم', 'g')}</small></div><div class="bar-prog" style="margin-top:8px"><i style="width:${c ? Math.min(100, it.p / c.protein * 100) : 0}%"></i></div></div>
     <div class="kpi"><div class="l">${L('المية', 'Water')}</div><div class="v">${fmt(w * 0.25)} <small>/ ${c ? fmt(c.water) : '—'} ${L('لتر', 'L')}</small></div><div class="s">${w} ${L('من', 'of')} ${wt} ${L('كوباية', 'glasses')}</div></div>
-    <div class="kpi"><div class="l">${L('سكر الشاي', 'Sugar in tea')}</div><div class="v">${fmt((d.tea || 0) * (d.sugar ?? 3) * 16, 0)} <small>${L('سعر', 'kcal')}</small></div><div class="s">${d.tea || 0} × ${d.sugar ?? 3} ${L('معلقة', 'tsp')}</div></div>
+    ${c && c.mT ? `<div class="kpi"><div class="l">${L('الماكروز المستهدفة', 'Macro targets')}</div><div class="v" style="font-size:1rem" dir="ltr">P ${(gym ? c.mT : c.mR).p} · C ${(gym ? c.mT : c.mR).c} · F ${(gym ? c.mT : c.mR).f}</div><div class="s">${L('جم · نظام', 'g · diet')}: ${esc(LX(DIETS[c.diet] || DIETS.balanced))}</div></div>` : ''}
   </div>
   <div class="two">
     <div class="card"><div class="head"><h2>${L('المية', 'Water')}</h2><span class="muted small">${L('دوس على الكوباية · كل واحدة 250 مل', 'Tap a glass · 250 ml each')}</span></div><div class="glasses">${Array.from({length: wt}, (_, i) => `<button type="button" class="glass ${i < w ? 'on' : ''}" data-water="${i + 1}" aria-label="${i + 1}"></button>`).join('')}</div></div>
-    <div class="card"><div class="head"><h2>${L('الشاي', 'Tea')}</h2><span class="muted small">${L('بعيد عن الأكل بساعة', 'One hour away from meals')}</span></div>
+    ${(+S.profile.tea || d.tea) ? `<div class="card"><div class="head"><h2>${L('الشاي والقهوة', 'Tea & coffee')}</h2><span class="muted small">${L('بعيد عن الأكل بساعة', 'One hour away from meals')}</span></div>
       <div class="row"><span>${L('كوبايات', 'Cups')}</span><span class="counter"><button type="button" data-cnt="tea|-1">−</button><b>${d.tea || 0}</b><button type="button" data-cnt="tea|1">+</button></span><span>${L('معالق سكر', 'Sugar tsp')}</span><span class="counter"><button type="button" data-cnt="sugar|-0.5">−</button><b>${d.sugar ?? 3}</b><button type="button" data-cnt="sugar|0.5">+</button></span></div>
-      <p class="muted small" style="margin:10px 0 0">${L('الهدف: نص معلقة أقل كل أسبوعين لحد معلقة واحدة.', 'Goal: half a teaspoon less every two weeks, down to one.')} ${pregnant() ? L('في الحمل: الكافيين أقل من 200 مجم في اليوم (حوالي كوبايتين شاي).', 'In pregnancy: caffeine under 200 mg a day (about two cups of tea).') : ''}</p></div>
+      <p class="muted small" style="margin:10px 0 0">${L('الهدف: نص معلقة أقل كل أسبوعين لحد معلقة واحدة.', 'Goal: half a teaspoon less every two weeks, down to one.')} ${pregnant() ? L('في الحمل: الكافيين أقل من 200 مجم في اليوم (حوالي كوبايتين شاي).', 'In pregnancy: caffeine under 200 mg a day (about two cups of tea).') : ''}</p></div>` : ''}
   </div>
   <div class="meals">${cards}</div>
-  <p class="muted small">${L('ممنوع حاليًا: البيض، الألبان العادية، البصل والتوم والطماطم، المقلي والحراق، البقوليات، واللب والمكسرات. التفاصيل في الخطة.', 'Avoid for now: eggs, regular dairy, onion/garlic/tomato, fried and spicy food, legumes, seeds and nuts. Details in the Plan.')}</p>`;
+  ${list.length ? '' : `<div class="card empty"><p>${L('لسه معملتش نظام أكلك. المعالج هيبنيه حسب جسمك وهدفك وصحتك.', 'You haven’t built your meal plan yet. The wizard builds it from your body, goal and health.')}</p><button class="btn fire" type="button" data-wiz="1">${L('ابني خطتي', 'Build my plan')}</button></div>`}
+  ${(() => { const hr = healthRules(), av = [...hr.avoid, ...(S.profile.dislikes || [])].filter(t => FTAG_L[t]); return av.length ? `<p class="muted small">${L('النظام متعمل من غير', 'Built without')}: ${[...new Set(av)].map(t => LX({ar: FTAG_L[t][0], en: FTAG_L[t][1]})).join('، ')}. ${L('التفاصيل في "خطتي".', 'Details in “My plan”.')}</p>` : ''; })()}`;
 }});
 on('click', e => {
-  const m = e.target.closest('[data-meal]'); if (m) { const [k, s] = m.dataset.meal.split('|'), dd = day(CUR); dd.meals ||= {}; const cur = dd.meals[k] || {}; dd.meals[k] = cur.s === s ? {} : {s, alt: cur.alt || 0}; const sk = {m1: 'meal1', m2: 'meal2', pre: 'pre', night: 'night'}[k]; dd.sched ||= {}; dd.sched[sk] = ['done', 'swap'].includes(dd.meals[k].s); store.save(); render(); return true; }
+  const m = e.target.closest('[data-meal]'); if (m) { const [k, s] = m.dataset.meal.split('|'), dd = day(CUR); dd.meals ||= {}; const cur = dd.meals[k] || {}; dd.meals[k] = cur.s === s ? {} : {s, alt: cur.alt || 0}; dd.sched ||= {}; dd.sched['meal-' + k] = ['done', 'swap'].includes(dd.meals[k].s); store.save(); render(); return true; }
   const w = e.target.closest('[data-water]'); if (w) { const dd = day(CUR), n = +w.dataset.water; dd.water = dd.water === n ? n - 1 : n; store.save(); render(); return true; }
   const cn = e.target.closest('[data-cnt]'); if (cn) { const [f, step] = cn.dataset.cnt.split('|'), dd = day(CUR), base = f === 'sugar' ? (dd.sugar ?? 3) : (dd[f] || 0); dd[f] = Math.max(0, Math.round((base + +step) * 2) / 2); store.save(); render(); return true; }
 });
@@ -304,6 +310,7 @@ on('change', e => {
   if (T.dataset.f) { const dd = day(CUR), f = T.dataset.f; dd[f] = T.dataset.text ? T.value : num(T.value); store.save(); if (VIEW !== 'log' || ['waist', 'neck', 'hip'].includes(f)) render(); return true; }
 });
 
+function gutOn(){ const c = S.profile?.conds || []; return c.some(k => ['ibd', 'ibs', 'celiac', 'gerd', 'gastritis', 'gallbladder', 'pancreatitis', 'diverticulitis'].includes(k)) || Object.values(S.days || {}).some(d => d && (d.stools || d.pain)); }
 registerView('log', {title: {ar: 'القياسات', en: 'Log'}, icon: 'log', render(){
   const d = dayOf(CUR), women = S.settings.edition === 'women';
   const scale = (f, from, to, cls) => `<div class="scale ${cls || ''}" role="group">${Array.from({length: to - from + 1}, (_, i) => i + from).map(v => `<button type="button" data-scale="${f}|${v}" aria-pressed="${d[f] === v}">${v}</button>`).join('')}</div>`;
@@ -321,14 +328,14 @@ registerView('log', {title: {ar: 'القياسات', en: 'Log'}, icon: 'log', re
       <p class="muted small" style="margin:0">${L('الصلوات بتتحسب من جدول اليوم', 'Prayers are counted from today’s plan')}: <b class="num">${prayersCount(CUR)}</b> / 5</p>
       <div class="fgrid">${inp('quran', L('قرآن (دقيقة)', 'Quran (min)'))}${inp('ilm', L('علم شرعي (دقيقة)', 'Study (min)'))}</div></div>
   </div>
-  <div class="card form"><h2>${L('المعدة والأمعاء', 'Gut')}</h2>
+  ${gutOn() ? `  <div class="card form"><h2>${L('المعدة والأمعاء', 'Gut')}</h2>
     <div class="two" style="gap:16px"><div><div class="eyebrow">${L('ألم البطن (0 = مفيش)', 'Abdominal pain (0 = none)')}</div>${scale('pain', 0, 10, 'gut')}</div><div><div class="eyebrow">${L('غازات وانتفاخ', 'Gas & bloating')}</div>${scale('gas', 0, 10, 'gut')}</div></div>
     <div class="row"><span>${L('مرات دخول الحمام', 'Bowel movements')}</span><span class="counter"><button type="button" data-cnt="stools|-1">−</button><b>${d.stools || 0}</b><button type="button" data-cnt="stools|1">+</button></span></div>
     <div><div class="eyebrow">${L('علامات (بتظهر في التنبيهات)', 'Warning signs (shown in alerts)')}</div><div class="chips danger" style="margin-top:6px">${chip('blood', L('دم في البراز', 'Blood in stool'))}${chip('night', L('إسهال صحّاني من النوم', 'Night diarrhoea'))}${chip('fever', L('حرارة', 'Fever'))}${chip('vomit', L('ترجيع', 'Vomiting'))}${chip('back', L('ألم نص الضهر بعد الأكل', 'Mid-back pain after food'))}${chip('allergy', L('حساسية جلدية', 'Skin allergy'))}</div></div>
     <div><div class="eyebrow">${L('أكلت حاجة من دول؟', 'Did you eat any of these?')}</div><div class="chips" style="margin-top:6px">${trig('lactose', L('ألبان عادية', 'Regular dairy'))}${trig('fried', L('مقلي أو دسم', 'Fried or fatty'))}${trig('onion', L('بصل أو توم أو طماطم', 'Onion, garlic or tomato'))}${trig('legumes', L('بقوليات', 'Legumes'))}${trig('spicy', L('حراق', 'Spicy'))}${trig('egg', L('بيض', 'Egg'))}</div></div>
     <div><div class="eyebrow">${L('سناك الليل كان', 'Night snack was')}</div><div class="chips" style="margin-top:6px">${[['safe', L('سناك آمن', 'Safe snack')], ['seeds', L('لب أو مكسرات', 'Seeds or nuts')], ['junk', L('حلويات أو مقرمشات', 'Sweets or chips')], ['none', L('مفيش', 'None')]].map(([v, l]) => `<button type="button" data-snack="${v}" aria-pressed="${d.snackType === v}">${l}</button>`).join('')}</div></div>
     <label class="f">${L('ملاحظات', 'Notes')}<textarea data-f="notes" data-text="1">${esc(d.notes || '')}</textarea></label>
-  </div>`;
+  </div>` : `<div class="card form"><h2>${L('ملاحظات اليوم', 'Today’s notes')}</h2>    <label class="f">${L('ملاحظات', 'Notes')}<textarea data-f="notes" data-text="1">${esc(d.notes || '')}</textarea></label></div>`}`;
 }});
 on('click', e => {
   const s = e.target.closest('[data-scale]'); if (s) { const [f, v] = s.dataset.scale.split('|'), dd = day(CUR); dd[f] = dd[f] === +v ? null : +v; store.save(); render(); return true; }
@@ -339,14 +346,14 @@ on('click', e => {
 
 /* ---------- insights ---------- */
 function demoData(){
-  const t = todayISO(), start = addDays(t, -41), o = {profile: {...DEF_PROFILE, start}, days: {}, labs: [], today: t};
+  const t = todayISO(), start = addDays(t, -41), o = {profile: {...DEF_PROFILE, sex: 'm', age: 32, height: 178, weight: 95, goal: 80, act: 1.45, gymdays: 5, goalType: 'lose', pace: 'mid', start}, days: {}, labs: [], today: t};
   const R = (i, a) => Math.abs((Math.sin(i * 12.9898 + a * 78.233) * 43758.5453) % 1);
   let w = 95.2;
   for (let i = 0; i <= 41; i++) {
     const iso = addDays(start, i), dow = D(iso).getDay(), plan = PROG[dow], seeds = R(i, 2) > (i < 14 ? 0.5 : 0.82);
     w -= (i < 10 ? 0.16 : 0.095); const wo = {};
     plan.ex.forEach(([id, sets]) => { wo[id] = Array.from({length: sets}, (_, j) => ({d: R(i, 3 + j) > 0.12, kg: EX[id].w ? Math.round((id === 'leg_press' ? 80 : id === 'assisted_pullup' ? 40 : 18) + i * 0.45) : null})); });
-    const meals = {}; ['m1', 'm2', 'pre', 'night'].forEach((k, j) => meals[k] = {s: R(i, 5 + j) > 0.05 ? (R(i, 9 + j) > 0.85 ? 'swap' : 'done') : 'skip', alt: 0});
+    const meals = {}; (mealsFor(iso).length ? mealsFor(iso).map(m => m.key) : ['m1', 'm2', 'm3']).forEach((k, j) => meals[k] = {s: R(i, 5 + j) > 0.05 ? (R(i, 9 + j) > 0.85 ? 'swap' : 'done') : 'skip', alt: 0});
     const sched = {}; scheduleFor(iso).forEach((x, j) => sched[x.k] = R(i, 20 + j) > (i < 14 ? 0.35 : 0.15));
     o.days[iso] = {weight: +(w + (R(i, 4) - 0.5) * 0.7).toFixed(1), waist: i % 7 === 0 ? +(104 - i * 0.11).toFixed(1) : null, neck: i % 7 === 0 ? 41 : null,
       steps: Math.round(5800 + i * 90 + R(i, 8) * 2200), sleep: +(5.6 + i * 0.035 + R(i, 9) * 0.9).toFixed(2), pain: seeds ? 4 : (R(i, 11) > 0.7 ? 2 : 1), gas: seeds ? 7 : 3 + (R(i, 12) > 0.75 ? 2 : 0), stools: 2,

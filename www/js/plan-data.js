@@ -96,7 +96,7 @@ const EX = {
     tip: ['اطلع للآخر وانزل للآخر ببطء.', 'Full range, slow lowering.'],
     f: {eq: SEAT, A: {...SE, el: [100, 78], ha: [112, 88], ft: [122, 124]}, B: {kn: [118, 86], ft: [122, 118], ha: [112, 82], el: [100, 74]}, att: [{t: 'toe', at: 'ft', to: [136, 124]}, {t: 'pad', at: 'kn'}]}}
 };
-const PROG = {
+let PROG = {
   6: {t: {ar: 'جزء علوي A', en: 'Upper body A'}, k: 'strength', ex: [['lat_pulldown', 3, '10–12', 90], ['chest_press', 3, '10–12', 90], ['cable_row', 3, '10–12', 90], ['db_shoulder_press', 3, '10–12', 75], ['db_curl', 2, '12', 60], ['tri_pushdown', 2, '12', 60]]},
   0: {t: {ar: 'جزء سفلي A', en: 'Lower body A'}, k: 'strength', ex: [['leg_press', 3, '10–12', 90], ['db_rdl', 3, '10', 90], ['lying_leg_curl', 3, '12', 60], ['leg_extension', 2, '12–15', 60], ['calf_raise', 3, '15', 45], ['dead_bug', 3, {ar: '10 لكل جنب', en: '10 per side'}, 45]]},
   1: {t: {ar: 'كارديو وبطن', en: 'Cardio & core'}, k: 'cardio', ex: [['incline_walk', 1, {ar: '40 دقيقة', en: '40 min'}, 0], ['bird_dog', 3, {ar: '10 لكل جنب', en: '10 per side'}, 45], ['side_plank', 3, {ar: '20 ثانية لكل جنب', en: '20 s per side'}, 45], ['glute_bridge', 3, '15', 45]]},
@@ -105,7 +105,7 @@ const PROG = {
   4: {t: {ar: 'مشي خفيف', en: 'Easy walk'}, k: 'walk', ex: [['outdoor_walk', 1, {ar: '45 دقيقة', en: '45 min'}, 0]]},
   5: {t: {ar: 'راحة كاملة', en: 'Full rest'}, k: 'rest', ex: []}
 };
-const GYM = [6, 0, 1, 2, 3];
+let GYM = [6, 0, 1, 2, 3];
 function weekNo(iso){ const s = S.profile?.start || iso; return Math.max(1, Math.floor(daysBetween(s, iso) / 7) + 1); }
 function phaseOf(w){ const c = ((w - 1) % 12) + 1;
   if (c <= 2) return {c, n: L('تعلّم الحركة', 'Learn the movements'), d: L('اختار وزن تقدر تعمل بيه 3–4 عدات زيادة عن المطلوب. التركيز على الأداء الصح.', 'Pick a weight you could do 3–4 more reps with. Focus on clean technique.')};
@@ -124,69 +124,5 @@ function planFor(iso){
 // ingredient: [ar, en, amount, unit, kind]  kind: p protein, c carb, v veg, f fat, x other
 const U = {g: ['جم', 'g'], graw: ['جم نيء', 'g raw'], ml: ['مل', 'ml'], pc: ['', ''], can: ['علبة', 'can'], tsp: ['معلقة صغيرة', 'tsp'], tbsp: ['معلقة كبيرة', 'tbsp'], cup: ['كوباية', 'cup'], txt: ['', '']};
 const I = (ar, en, n, u, k) => [ar, en, n, u, k];
-const PRE = {n: {ar: 'موزة + حليب خالي اللاكتوز', en: 'Banana + lactose-free milk'}, t: '16:10', ing: [I('موزة متوسطة', 'Medium banana', 1, 'pc', 'c'), I('حليب خالي من اللاكتوز', 'Lactose-free milk', 250, 'ml', 'p')], k: 230, p: 9, how: {ar: 'قبل الجيم بـ20 دقيقة، مع كوباية الشاي التالتة.', en: '20 minutes before the gym, with your third cup of tea.'}};
-const PRE_ALT = [
-  {n: {ar: 'موزتين', en: 'Two bananas'}, k: 210, p: 2, ing: [I('موز', 'Bananas', 2, 'pc', 'c')]},
-  {n: {ar: 'كعك أرز + مربى + موزة', en: 'Rice cakes + jam + banana'}, k: 240, p: 3, ing: [I('كعك أرز', 'Rice cakes', 2, 'pc', 'c'), I('مربى', 'Jam', 1, 'tsp', 'x'), I('موزة', 'Banana', 1, 'pc', 'c')]}
-];
-const NIGHT = {n: {ar: 'تونة على كعك أرز', en: 'Tuna on rice cakes'}, t: '22:30', ing: [I('تونة بالمية مصفاة', 'Tuna in water, drained', 60, 'g', 'p'), I('كعك أرز', 'Rice cakes', 2, 'pc', 'c'), I('ليمون وشبت', 'Lemon & dill', 'رشة|pinch', 'txt', 'x')], k: 170, p: 16, how: {ar: 'دقيقتين تحضير. في طبق مش من الكيس، وبعده اغسل سنانك.', en: 'Two minutes. Eat it from a plate, then brush your teeth.'}};
-const NIGHT_ALT = [
-  {n: {ar: 'شيبس بطاطس في الفرن', en: 'Oven potato chips'}, k: 150, p: 3, ing: [I('بطاطس شرايح رفيعة', 'Thin potato slices', 150, 'g', 'c'), I('رشة زيت وملح وبابريكا', 'Oil spray, salt, paprika', '', 'txt', 'f')]},
-  {n: {ar: 'خيار مقشر بالليمون والملح', en: 'Peeled cucumber with lemon & salt'}, k: 40, p: 1, ing: [I('خيار مقشر', 'Peeled cucumbers', 2, 'pc', 'v')]},
-  {n: {ar: 'حليب خالي اللاكتوز بالقرفة', en: 'Lactose-free milk with cinnamon'}, k: 130, p: 8, ing: [I('حليب خالي اللاكتوز', 'Lactose-free milk', 250, 'ml', 'p')]}
-];
-const MEAL_ALT = [
-  {n: {ar: 'سمك فيليه في الفرن + رز', en: 'Oven fish fillet + rice'}, k: 845, p: 75, ing: [I('فيليه سمك (بلطي أو باسا)', 'Fish fillet (tilapia or basa)', 350, 'graw', 'p'), I('رز أبيض مطبوخ', 'Cooked white rice', 300, 'g', 'c'), I('جزر', 'Carrot', 100, 'g', 'v'), I('زيت زيتون', 'Olive oil', 1, 'tsp', 'f')]},
-  {n: {ar: 'فراخ في الفرن + بطاطس', en: 'Oven chicken + potatoes'}, k: 780, p: 70, ing: [I('صدور فراخ', 'Chicken breast', 300, 'graw', 'p'), I('بطاطس', 'Potatoes', 350, 'g', 'c'), I('زيت زيتون', 'Olive oil', 1, 'tsp', 'f')]},
-  {n: {ar: 'تونة + بطاطس مسلوقة', en: 'Tuna + boiled potatoes'}, k: 700, p: 60, ing: [I('تونة بالمية مصفاة', 'Tuna in water, drained', 2, 'can', 'p'), I('بطاطس مسلوقة', 'Boiled potatoes', 350, 'g', 'c'), I('ليمون وشبت وزيت زيتون', 'Lemon, dill, olive oil', 1, 'tbsp', 'f')]}
-];
-const FISH = I('فيليه سمك (بلطي أو باسا)', 'Fish fillet (tilapia or basa)', 350, 'graw', 'p');
-const MEALS = {
-  6: {m1: {n: {ar: 'صينية فراخ بالبطاطس والجزر', en: 'Chicken, potato & carrot tray bake'}, ing: [I('صدور فراخ', 'Chicken breast', 300, 'graw', 'p'), I('بطاطس', 'Potatoes', 350, 'g', 'c'), I('جزر', 'Carrots', 100, 'g', 'v'), I('زيت التوم', 'Garlic-infused oil', 1, 'tbsp', 'f')], k: 800, p: 70,
-        how: {ar: 'قطّع كله مكعبات في صينية واحدة: كمون + بابريكا + ملح + زيت التوم، في الفرن 200 درجة 35 دقيقة. اعمل صينيتين وخلّي واحدة لبكرة.', en: 'Cube everything onto one tray with cumin, paprika, salt and garlic oil. Bake at 200°C for 35 min. Make two trays and keep one for tomorrow.'}},
-      m2: {n: {ar: 'سمك فيليه بالليمون والكمون + رز', en: 'Lemon-cumin fish fillet + rice'}, ing: [FISH, I('رز أبيض مطبوخ', 'Cooked white rice', 300, 'g', 'c'), I('كوسة', 'Zucchini', 100, 'g', 'v')], k: 845, p: 75,
-        how: {ar: 'الفيليه في ورق فويل مع ليمون + كمون + كزبرة ناشفة + معلقة زيت، في الفرن 200 درجة 18 دقيقة.', en: 'Fillet in foil with lemon, cumin, dried coriander and a spoon of oil. 200°C for 18 min.'}}},
-  0: {m1: {n: {ar: 'ستيك + بطاطس في الفرن', en: 'Steak + oven potatoes'}, ing: [I('ستيك لحم (قطعية رخيصة أو مجمد)', 'Beef steak (budget or frozen cut)', 250, 'graw', 'p'), I('بطاطس', 'Potatoes', 350, 'g', 'c'), I('زيت زيتون', 'Olive oil', 1, 'tsp', 'f')], k: 820, p: 60,
-        how: {ar: 'البطاطس أصابع في الفرن 30 دقيقة. الستيك ملح وفلفل أسود في طاسة سخنة جدًا 3–4 دقايق لكل جنب، وسيبه 5 دقايق قبل التقطيع.', en: 'Potato wedges in the oven for 30 min. Season the steak with salt and black pepper, sear in a very hot pan 3–4 min per side, rest 5 min.'}},
-      m2: {n: {ar: 'سمك فيليه + رز بالكمون', en: 'Fish fillet + cumin rice'}, ing: [FISH, I('رز أبيض مطبوخ', 'Cooked white rice', 300, 'g', 'c'), I('جزر مبشور', 'Grated carrot', 80, 'g', 'v')], k: 835, p: 75,
-        how: {ar: 'نفس طريقة السبت، والتتبيلة: كركم + كمون + ليمون.', en: 'Same as Saturday; season with turmeric, cumin and lemon.'}}},
-  1: {m1: {n: {ar: 'تونة بالبطاطس والشبت', en: 'Tuna, potato & dill salad'}, ing: [I('تونة بالمية مصفاة', 'Tuna in water, drained', 2, 'can', 'p'), I('بطاطس مسلوقة', 'Boiled potatoes', 350, 'g', 'c'), I('خيار مقشر', 'Peeled cucumber', 1, 'pc', 'v'), I('ليمون + شبت + زيت زيتون', 'Lemon, dill, olive oil', 1, 'tbsp', 'f')], k: 700, p: 60,
-        how: {ar: 'من غير طبخ لو البطاطس مسلوقة من قبل. قلّب كله في علبة وخدها الشغل.', en: 'No cooking if the potatoes are pre-boiled. Mix in a box and take it to work.'}},
-      m2: {n: {ar: 'فراخ في الفرن + رز', en: 'Oven chicken + rice'}, ing: [I('صدور فراخ', 'Chicken breast', 300, 'graw', 'p'), I('رز أبيض مطبوخ', 'Cooked white rice', 300, 'g', 'c'), I('كوسة', 'Zucchini', 100, 'g', 'v')], k: 800, p: 70,
-        how: {ar: 'من صينية السبت، أو صدور متبلة 25 دقيقة في الفرن.', en: 'From Saturday’s tray, or seasoned breasts baked for 25 min.'}}},
-  2: {m1: {n: {ar: 'سمك فيليه + بطاطس', en: 'Fish fillet + potatoes'}, ing: [FISH, I('بطاطس', 'Potatoes', 350, 'g', 'c'), I('طحينة بالليمون', 'Tahini with lemon', 15, 'g', 'f')], k: 835, p: 76,
-        how: {ar: 'البطاطس 15 دقيقة لوحدها في الصينية، وبعدين ضيف السمك 18 دقيقة.', en: 'Potatoes alone on the tray for 15 min, then add the fish for 18 min.'}},
-      m2: {n: {ar: 'كبدة + رز', en: 'Beef liver + rice'}, ing: [I('كبدة بقري', 'Beef liver', 250, 'graw', 'p'), I('رز أبيض مطبوخ', 'Cooked white rice', 300, 'g', 'c'), I('ليمون', 'Lemon', 0.5, 'pc', 'x')], k: 780, p: 56, liver: true,
-        how: {ar: 'شرايح رفيعة في طاسة بمعلقة زيت + كمون، 5 دقايق بس، من غير شطة. الشاي بعدها بساعة علشان الحديد.', en: 'Thin slices in a pan with a spoon of oil and cumin, 5 minutes, no chili. Tea one hour later so you absorb the iron.'}}},
-  3: {m1: {n: {ar: 'ستيك + رز + جزر', en: 'Steak + rice + carrots'}, ing: [I('ستيك لحم', 'Beef steak', 250, 'graw', 'p'), I('رز أبيض مطبوخ', 'Cooked white rice', 300, 'g', 'c'), I('جزر', 'Carrots', 100, 'g', 'v')], k: 820, p: 60,
-        how: {ar: 'نفس طريقة الأحد. الجزر شرايح في الفرن مع رشة زيت 20 دقيقة.', en: 'Same as Sunday. Carrot slices roasted with a little oil for 20 min.'}},
-      m2: {n: {ar: 'صينية سمك بالبطاطس والجزر', en: 'Fish, potato & carrot tray'}, ing: [FISH, I('بطاطس', 'Potatoes', 350, 'g', 'c'), I('جزر', 'Carrots', 100, 'g', 'v'), I('زيت التوم', 'Garlic-infused oil', 1, 'tbsp', 'f')], k: 865, p: 76,
-        how: {ar: 'بطاطس وجزر شرايح 15 دقيقة، وبعدين السمك فوقهم بالكمون والليمون 18 دقيقة.', en: 'Sliced potatoes and carrots for 15 min, then the fish on top with cumin and lemon for 18 min.'}}},
-  4: {m1: {n: {ar: 'فراخ في الفرن + بطاطس', en: 'Oven chicken + potatoes'}, ing: [I('صدور فراخ', 'Chicken breast', 300, 'graw', 'p'), I('بطاطس', 'Potatoes', 350, 'g', 'c'), I('خيار مقشر', 'Peeled cucumber', 1, 'pc', 'v')], k: 745, p: 70,
-        how: {ar: 'يوم راحة نشطة.', en: 'Active rest day.'}},
-      m2: {n: {ar: 'سمك فيليه + رز', en: 'Fish fillet + rice'}, ing: [FISH, I('رز أبيض مطبوخ', 'Cooked white rice', 250, 'g', 'c'), I('كوسة', 'Zucchini', 100, 'g', 'v')], k: 770, p: 73,
-        how: {ar: 'وأنت بتجهّز أكل نهاية الأسبوع.', en: 'While you prep food for the weekend.'}}},
-  5: {m1: {n: {ar: 'الوجبة الحرة: فتة فراخ معدّلة', en: 'Free meal: lighter chicken fatta'}, ing: [I('صدور فراخ مسلوقة', 'Boiled chicken breast', 250, 'g', 'p'), I('رز أبيض مطبوخ', 'Cooked white rice', 200, 'g', 'c'), I('عيش محمص في الفرن', 'Oven-toasted bread', 30, 'g', 'c'), I('مرقة الفراخ', 'Chicken broth', 1, 'cup', 'x')], k: 820, p: 66,
-        how: {ar: 'من غير خل وتوم. كمية طبيعية، مش بوفيه مفتوح.', en: 'No vinegar or garlic. A normal portion, not a buffet.'}},
-      m2: {n: {ar: 'خفيفة: تونة + بطاطس', en: 'Light: tuna + potatoes'}, ing: [I('تونة بالمية مصفاة', 'Tuna in water, drained', 2, 'can', 'p'), I('بطاطس مسلوقة', 'Boiled potatoes', 300, 'g', 'c')], k: 600, p: 58,
-        how: {ar: 'وجبة خفيفة بعد الوجبة الحرة.', en: 'Light meal after the free meal.'}}}
-};
-// portion scaling for the women's edition (by ingredient kind) and the pregnancy liver swap
-function portionF(kind){ if (S.settings.edition !== 'women') return 1; return kind === 'p' ? 0.85 : kind === 'c' ? 0.7 : 1; }
-function scaleMeal(m){
-  if (pregnant() && m.liver) m = {...m, n: {ar: 'فراخ في الفرن + رز (بدل الكبدة في الحمل)', en: 'Oven chicken + rice (replaces liver in pregnancy)'}, ing: [I('صدور فراخ', 'Chicken breast', 300, 'graw', 'p'), I('رز أبيض مطبوخ', 'Cooked white rice', 300, 'g', 'c')], k: 800, p: 70, how: {ar: 'الكبدة فيها فيتامين A عالي، فبتتشال في الحمل.', en: 'Liver is very high in vitamin A, so it is removed during pregnancy.'}};
-  if (S.settings.edition !== 'women') return m;
-  const extra = pregnant() ? (S.women.trimester === 3 ? 1.18 : S.women.trimester === 2 ? 1.14 : 1) : 1;
-  return {...m, ing: m.ing.map(x => typeof x[2] === 'number' && x[3] !== 'pc' && x[3] !== 'can' ? [...x.slice(0, 2), Math.round(x[2] * portionF(x[4]) * extra / 5) * 5, ...x.slice(3)] : x), k: Math.round(m.k * 0.78 * extra), p: Math.round(m.p * 0.85 * extra)};
-}
 const ingAmt = x => { if (x[3] === 'txt') { const s = String(x[2] || ''); return s.includes('|') ? (LANG === 'en' ? s.split('|')[1] : s.split('|')[0]) : s; } const u = LANG === 'en' ? U[x[3]][1] : U[x[3]][0]; return (fmt(x[2], 1) + ' ' + u).trim(); };
 const ingName = x => LANG === 'en' ? x[1] : x[0];
-function mealsFor(iso){
-  const dow = D(iso).getDay(), m = MEALS[dow], gym = GYM.includes(dow);
-  const sc = o => scaleMeal(o);
-  const list = [{key: 'm1', t: '12:30', title: L('الوجبة الأولى', 'Meal 1'), alts: MEAL_ALT.map(sc), ...sc(m.m1)}];
-  if (gym) list.push({key: 'pre', title: L('قبل الجيم', 'Pre-workout'), alts: PRE_ALT, ...PRE});
-  list.push({key: 'm2', t: '18:15', title: L('الوجبة التانية', 'Meal 2'), alts: MEAL_ALT.map(sc), ...sc(m.m2)});
-  list.push({key: 'night', title: L('سناك الليل', 'Night snack'), alts: NIGHT_ALT, ...NIGHT});
-  return list;
-}

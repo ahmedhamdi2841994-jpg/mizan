@@ -35,9 +35,9 @@ function applyLang(){
 }
 
 /* ---------- state ---------- */
-const DEF_SETTINGS = { lang: 'ar', theme: 'dark', edition: 'men', city: 'turaif', lat: 31.6725, lng: 38.6637, tz: 3, cityName: 'طريف', asr: 1, ishaRamadan: true, workEnd: '16:00', gymTime: '16:30', courseDays: [0,1,2,3,4], courseTime: '20:30',
+const DEF_SETTINGS = { lang: 'ar', theme: 'dark', edition: 'men', city: 'riyadh', lat: 24.7136, lng: 46.6753, tz: 3, cityName: 'الرياض', country: 'sa', asr: 1, ishaRamadan: true, workEnd: '16:00', gymTime: '17:00', courseDays: [], courseTime: '20:30', courseName: '',
   notify: { prayer: true, preAdhan: 10, adhkar: true, meals: true, water: true, waterEvery: 90, tea: true, gym: true, sleep: true, weigh: true, prep: true, course: true, adhan: 'default', tasks: true, meds: true, events: true, shop: true, bills: true, habits: true, fasting: true, khatma: true, journal: false }, newsSources: null, sound: true };
-const DEF_PROFILE = { name: '', sex: 'm', age: 32, height: 187.5, weight: 95, goal: 80, act: 1.45, gymdays: 5, def: 700, start: todayISO(), conds: ['ibd', 'steroids'], allergies: 'لاكتوز، بيض' };
+const DEF_PROFILE = { name: '', sex: 'm', age: null, height: null, weight: null, goal: null, act: 1.375, gymdays: 3, def: 0, start: todayISO(), conds: [], meds: [], allergies: [], injuries: [], dislikes: [] };
 let S = { settings: {...DEF_SETTINGS}, profile: {...DEF_PROFILE}, days: {}, labs: [], games: {}, quran: {}, adhkar: {}, women: {}, onboarded: false };
 const LS = 'mizan-app-v1';
 const store = {
@@ -125,7 +125,12 @@ const IC = {
   moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   zakat: '<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
-  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>'
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  calc: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8v4H8zM8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
+  kb: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5M9 7h7M9 11h5"/>',
+  route: '<circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5"/>',
+  plane: '<path d="M10.5 13.5L3 11l1.5-1.5 8 1 4-4.5c1-1 3-1.5 3.5-1s0 2.5-1 3.5l-4.5 4 1 8L14 22l-2.5-7.5L7 18v3l-1.5 1-1-3.5L1 17.5 2 16h3z"/>',
+  scale: '<path d="M12 3v18M5 21h14M4 7h16M4 7l-3 7a3.5 3.5 0 0 0 6 0zM20 7l-3 7a3.5 3.5 0 0 0 6 0z"/>'
 };
 const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k] || IC.more}</svg>`;
 
@@ -134,11 +139,12 @@ const VIEWS = {};      // id -> {render, title:{ar,en}, icon, group, women?}
 let VIEW = 'today';
 function registerView(id, def){ VIEWS[id] = def; }
 const NAV_GROUPS = [
-  {g: {ar: 'يومي', en: 'Daily'}, ids: ['today', 'workout', 'meals', 'log']},
+  {g: {ar: 'يومي', en: 'Daily'}, ids: ['today', 'plan', 'workout', 'meals', 'log']},
   {g: {ar: 'حياتي', en: 'My life'}, ids: ['planner', 'shop', 'money', 'meds', 'events', 'habits']},
+  {g: {ar: 'أدوات', en: 'Tools'}, ids: ['kb', 'calc', 'routes', 'travel', 'decide']},
   {g: {ar: 'الإيمان', en: 'Faith'}, ids: ['prayer', 'adhkar', 'tasbeeh', 'quran', 'khatma', 'hijri', 'zakat']},
   {g: {ar: 'المعرفة والتسلية', en: 'Mind & fun'}, ids: ['nasheed', 'library', 'news', 'games']},
-  {g: {ar: 'المتابعة', en: 'Tracking'}, ids: ['women', 'insights', 'health', 'plan', 'notify', 'settings']}
+  {g: {ar: 'المتابعة', en: 'Tracking'}, ids: ['women', 'insights', 'health', 'notify', 'settings']}
 ];
 const BOTTOM = ['today', 'workout', 'meals', 'prayer'];
 function visibleView(id){ const v = VIEWS[id]; return v && (!v.women || S.settings.edition === 'women' || !!S.settings.showWomen); }
