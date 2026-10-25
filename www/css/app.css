@@ -520,3 +520,15 @@ details.brands summary{cursor:pointer;color:var(--ink-2);font-weight:600}
 .dcbar i{display:block;height:100%;background:var(--grad)}
 .dcadd{display:grid;place-items:center;min-height:120px;border-style:dashed;color:var(--ink-2);cursor:pointer;font:inherit;font-weight:600}
 @media (max-width:600px){.ckeys button{padding:14px 0}.kbex.open .kbfig{width:96px;height:96px;flex-basis:96px}}
+/* ---------- v3.1: my kitchen ---------- */
+.kitchen{display:grid;gap:16px}
+.kitchen .f > span{display:block;font-size:.86rem;color:var(--ink-2);margin-bottom:6px;font-weight:500}
+.kpref{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed var(--line)}
+.kpref:last-child{border-bottom:0}
+.kgrp{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;background:var(--panel-2)}
+.kgrp summary{cursor:pointer;font-weight:600}
+.kmeth{display:grid;gap:6px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
+.kmeth > span{font-size:.82rem;color:var(--ink-2)}
+.chips button.kblk,.chips button:disabled{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+.kmeth .chips button.kblk{text-decoration:none}
+.kitchen .goalgrid{grid-template-columns:repeat(auto-fill,minmax(min(46%,180px),1fr))}

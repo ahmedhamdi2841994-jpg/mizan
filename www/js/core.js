@@ -126,6 +126,7 @@ const IC = {
   zakat: '<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  pot: '<path d="M4 10h16v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M2 10h20M9 6c0-1 1-2 1-3M14 6c0-1 1-2 1-3"/>',
   calc: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8v4H8zM8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
   kb: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5M9 7h7M9 11h5"/>',
   route: '<circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5"/>',
@@ -139,7 +140,7 @@ const VIEWS = {};      // id -> {render, title:{ar,en}, icon, group, women?}
 let VIEW = 'today';
 function registerView(id, def){ VIEWS[id] = def; }
 const NAV_GROUPS = [
-  {g: {ar: 'يومي', en: 'Daily'}, ids: ['today', 'plan', 'workout', 'meals', 'log']},
+  {g: {ar: 'يومي', en: 'Daily'}, ids: ['today', 'plan', 'workout', 'meals', 'kitchen', 'log']},
   {g: {ar: 'حياتي', en: 'My life'}, ids: ['planner', 'shop', 'money', 'meds', 'events', 'habits']},
   {g: {ar: 'أدوات', en: 'Tools'}, ids: ['kb', 'calc', 'routes', 'travel', 'decide']},
   {g: {ar: 'الإيمان', en: 'Faith'}, ids: ['prayer', 'adhkar', 'tasbeeh', 'quran', 'khatma', 'hijri', 'zakat']},

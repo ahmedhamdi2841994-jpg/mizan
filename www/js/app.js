@@ -56,7 +56,7 @@ on('change', async e => {
 
 /* ---------- boot ---------- */
 (function boot(){
-  store.load(); LANG = S.settings.lang || 'ar'; applyLang(); applyTheme(); updateWomen(); LIFE(); try { if (S.plan?.train) applyProgram(S.plan.train); } catch (e) {} try { womenAutoShop(); } catch (e) {} if (LIFE().focus.run) focusTick();
+  store.load(); LANG = S.settings.lang || 'ar'; applyLang(); applyTheme(); updateWomen(); LIFE(); try { if (S.plan?.train) applyProgram(S.plan.train); } catch (e) {} try { kitchenAutoRefresh(); } catch (e) {} try { womenAutoShop(); } catch (e) {} if (LIFE().focus.run) focusTick();
   try { const v = localStorage.getItem('mizan-view'); if (v && VIEWS[v]) VIEW = v; } catch (e) {}
   if (!visibleView(VIEW)) VIEW = 'today';
   renderNav(); render();
@@ -64,7 +64,7 @@ on('change', async e => {
   setTimeout(() => { $('#splash').classList.add('out'); setTimeout(() => $('#splash').remove(), 600); if (S.planV !== 3) wizStart(!S.onboarded); }, reduceMotion ? 200 : 1300);
   $('#timerStop').onclick = () => { clearInterval(timerT); $('#timer').hidden = true; };
   setTimeout(rescheduleAll, 1500);
-  const App = window.Capacitor?.Plugins?.App; if (App) { App.addListener('appStateChange', st => { if (st.isActive) { CUR = todayISO(); try { womenAutoShop(); } catch (e) {} render(); rescheduleAll(); } }); App.addListener('backButton', () => { if (!$('#sheet').hidden) closeSheet(); else if (VIEW !== 'today') go('today'); else App.exitApp(); }); }
+  const App = window.Capacitor?.Plugins?.App; if (App) { App.addListener('appStateChange', st => { if (st.isActive) { CUR = todayISO(); try { kitchenAutoRefresh(); } catch (e) {} try { womenAutoShop(); } catch (e) {} render(); rescheduleAll(); } }); App.addListener('backButton', () => { if (!$('#sheet').hidden) closeSheet(); else if (VIEW !== 'today') go('today'); else App.exitApp(); }); }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && CUR !== todayISO() && daysBetween(CUR, todayISO()) === 1) { CUR = todayISO(); render(); } });
   if ('serviceWorker' in navigator && !isNative() && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();

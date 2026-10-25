@@ -9,9 +9,15 @@ FD('thigh', 'أوراك فراخ من غير جلد', 'Skinless chicken thighs',
 FD('mince', 'لحمة مفرومة قليلة الدهن', 'Lean minced beef', 176, 20, 0, 10, 'graw', 1, 'keto redmeat satfat purine', 2);
 FD('steak', 'ستيك لحم', 'Beef steak', 160, 21, 0, 8, 'graw', 1, 'keto redmeat purine', 2);
 FD('lamb', 'لحم ضاني قليل الدهن', 'Lean lamb', 205, 20, 0, 13.5, 'graw', 1, 'keto redmeat satfat purine', 3);
+FD('beefcube', 'لحمة بقري مكعبات', 'Diced beef', 185, 20, 0, 11.5, 'graw', 1, 'keto redmeat satfat purine', 2);
+FD('beefbone', 'لحمة بالعضم (الجزء اللي بيتاكل)', 'Bone-in beef (edible part)', 215, 19, 0, 15, 'graw', 1, 'keto redmeat satfat purine', 1);
 FD('liver', 'كبدة بقري', 'Beef liver', 135, 20.4, 3.9, 3.6, 'graw', 1, 'organ purine redmeat', 1);
+FD('chickwhole', 'فرخة كاملة (من غير جلد)', 'Whole chicken (skinless meat)', 140, 20, 0, 6.5, 'graw', 1, 'keto', 1);
+FD('grilledchk', 'فراخ مشوية جاهزة (من غير جلد)', 'Ready rotisserie chicken (skinless)', 170, 27, 0, 7, 'g', 1, 'keto salty', 2);
 FD('tilapia', 'بلطي', 'Tilapia fillet', 96, 20, 0, 1.7, 'graw', 1, 'fish keto lean', 1);
 FD('hamour', 'هامور أو بياض', 'Grouper / white fish', 92, 19.4, 0, 1, 'graw', 1, 'fish keto lean', 2);
+FD('mullet', 'بوري', 'Mullet', 117, 19.4, 0, 3.8, 'graw', 1, 'fish keto', 1);
+FD('fishfz', 'فيليه سمك مجمد', 'Frozen fish fillet', 90, 18.5, 0, 1.5, 'graw', 1, 'fish keto lean', 1);
 FD('salmon', 'سلمون', 'Salmon', 208, 20, 0, 13, 'graw', 1, 'fish keto omega', 3);
 FD('shrimp', 'جمبري', 'Shrimp', 85, 20, 0.5, 0.5, 'graw', 1, 'seafood keto purine', 3);
 FD('tuna', 'تونة بالمية مصفاة', 'Tuna in water, drained', 116, 26, 0, 1, 'g', 1, 'fish keto lean', 1);
@@ -76,9 +82,11 @@ FD('pepper', 'فلفل رومي', 'Bell pepper', 31, 1, 6, 0.3, 'g', 1, 'keto ve
 FD('cauli', 'قرنبيط', 'Cauliflower', 25, 1.9, 5, 0.3, 'g', 1, 'keto veg fodmap', 1);
 FD('eggplant', 'باذنجان', 'Eggplant', 25, 1, 5.9, 0.2, 'g', 1, 'keto veg', 1);
 FD('salad', 'سلطة خضرا', 'Green salad', 18, 1, 3.6, 0.2, 'g', 1, 'keto veg', 1);
+FD('onion', 'بصل', 'Onion', 40, 1.1, 9.3, 0.1, 'g', 1, 'veg fodmap', 1);
 FD('mixveg', 'خضار مشكل', 'Mixed vegetables', 40, 2, 8, 0.3, 'g', 1, 'veg', 1);
 /* fats */
 FD('oil', 'زيت زيتون', 'Olive oil', 884, 0, 0, 100, 'tsp', 4.5, 'keto fat', 1);
+FD('vegoil', 'زيت نباتي', 'Vegetable oil', 884, 0, 0, 100, 'tsp', 4.5, 'keto fat', 1);
 FD('ghee', 'سمنة', 'Ghee', 900, 0, 0, 100, 'tsp', 4.5, 'keto fat satfat', 1);
 FD('butter', 'زبدة', 'Butter', 717, 0.9, 0.1, 81, 'tsp', 5, 'keto fat satfat lactose', 1);
 FD('tahini', 'طحينة', 'Tahini', 595, 17, 21, 54, 'tbsp', 15, 'sesame fat keto', 1);

@@ -28,6 +28,7 @@ function reminderPlan(days = 5){
     if (n.water) for (let m = 8 * 60 + 30; m <= 22 * 60; m += Math.max(30, n.waterEvery || 90)) push('water-' + m, m, L('اشرب كوباية مية 💧', 'Drink a glass of water 💧'), L('ودوس على الكوباية في صفحة الأكل', 'Then tap a glass on the Meals page'), 'water');
     if (typeof womenReminders === 'function') womenReminders(iso, push);
     if (typeof lifeReminders === 'function') lifeReminders(iso, push);
+    if (typeof kitchenReminders === 'function') kitchenReminders(iso, push);
   }
   return out.sort((a, b) => a.when - b.when);
 }

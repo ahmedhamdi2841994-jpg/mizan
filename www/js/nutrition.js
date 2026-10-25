@@ -1,6 +1,6 @@
 /* ميزان — مولّد نظام الأكل: بيختار النظام ويحسب الماكروز ويبني وجبات 7 أيام بالكميات، مع بدائل لكل وجبة. */
 'use strict';
-const MEAT = new Set(['chicken', 'thigh', 'mince', 'steak', 'lamb', 'liver', 'tilapia', 'hamour', 'salmon', 'shrimp', 'tuna', 'sardine']);
+const MEAT = new Set(['chicken', 'thigh', 'mince', 'steak', 'lamb', 'liver', 'tilapia', 'hamour', 'salmon', 'shrimp', 'tuna', 'sardine', 'beefcube', 'beefbone', 'chickwhole', 'grilledchk', 'mullet', 'fishfz']);
 const GSWAP = {lactose: {milk: 'lfmilk', yogurt: 'lfyog', greek: 'lfyog', cottage: 'lfyog', butter: 'oil', labneh: 'olives', feta: 'olives', halloumi: 'tofu', cheddar: 'olives'}, gluten: {baladi: 'gfbread', pita: 'gfbread', toast: 'gfbread', pasta: 'rice', bulgur: 'rice', freekeh: 'quinoa'}, nuts: {almond: 'olives', walnut: 'olives'}, peanut: {pb: 'tahini'}, sesame: {tahini: 'oil', hummus: 'cottage'}, fodmap: {apple: 'kiwi', watermelon: 'melon', cauli: 'zucchini', honey: 'banana', avocado: 'olives', milk: 'lfmilk', yogurt: 'lfyog', greek: 'lfyog', cottage: 'lfyog', baladi: 'gfbread', pita: 'gfbread', toast: 'gfbread', pasta: 'rice', bulgur: 'rice', freekeh: 'quinoa'}, organ: {liver: 'steak'}, fava: {ful: 'cottage'}, soy: {soymilk: 'lfmilk', tofu: 'cottage'}, highK: {}, salty: {feta: 'cottage', halloumi: 'cottage', sardine: 'tuna', olives: 'avocado'}};
 function resolveDiet(p, hr){
   p ||= S.profile; hr ||= healthRules(p); const want = p.diet || 'auto';
@@ -17,11 +17,12 @@ function dietAvoid(diet, p, hr){
 }
 const foodHas = (id, tag) => tag === 'meat' ? MEAT.has(id) : FOOD[id].tags.has(tag);
 /* adapt one dish to the person: swap or reject it */
-function adaptDish(d, avoid, limit, budget){
-  const parts = [], swaps = [];
+function adaptDish(d, avoid, limit, budget, have){
+  const parts = [], swaps = []; let hs = 0;
   for (const [fid, role, base] of d.parts) {
     let id = fid; const bad = t => foodHas(id, t);
     for (const t of avoid) { if (!bad(t)) continue; const alt = (d.swap || {})[id] || (GSWAP[t] || {})[id]; if (alt && FOOD[alt] && ![...avoid].some(tt => foodHas(alt, tt))) { id = alt; } else return null; }
+    if (have && !have.has(id)) { const alt = typeof kitchenSub === 'function' ? kitchenSub(id, role, have, avoid) : null; if (!alt || (role === 'p' && ['grilledchk', 'tuna', 'sardine'].includes(alt)) || ++hs > 1) return null; id = alt; }
     if (id === fid && FOOD[id].cost > Math.max(2, budget || 2) && budget < 3) return null;
     if (id !== fid) swaps.push([fid, id]);
     const amt = id === fid ? base : (FOOD[id].u === FOOD[fid].u ? base : FOOD[id].u === 'pc' ? 1 : FOOD[id].u === 'tsp' ? 2 : 150), ex = parts.find(x => x[0] === id && x[1] === role);
@@ -55,9 +56,9 @@ function scaleDish(d, T){
 const ingOf = parts => parts.map(([id, r, v]) => I(FOOD[id].ar, FOOD[id].en, v, FOOD[id].u === 'graw' ? 'graw' : FOOD[id].u === 'ml' ? 'ml' : FOOD[id].u === 'pc' ? 'pc' : FOOD[id].u === 'tsp' ? 'tsp' : FOOD[id].u === 'tbsp' ? 'tbsp' : 'g', r));
 function refreshMeal(m){ m.parts = m.parts.map(([id, r, v]) => [id, r, roundAmt(id, v)]).filter(([, , v]) => v > 0); const x = macrosOf(m.parts); Object.assign(m, {k: Math.round(x.k), p: Math.round(x.p), c: Math.round(x.c), f: Math.round(x.f), ing: ingOf(m.parts)}); return m; }
 /* nudge a whole day so it lands on the day's calories and protein (and keto carbs) */
-function balanceDay(meals, T, diet, avoid){
+function balanceDay(meals, T, diet, avoid, have){
   if (!meals.length) return meals;
-  const okF = id => FOOD[id] && ![...avoid].some(t => foodHas(id, t)) && (diet !== 'keto' || FOOD[id].tags.has('keto')) && !(diet === 'vegetarian' && MEAT.has(id));
+  const okF = id => FOOD[id] && (!have || have.has(id)) && ![...avoid].some(t => foodHas(id, t)) && (diet !== 'keto' || FOOD[id].tags.has('keto')) && !(diet === 'vegetarian' && MEAT.has(id));
   const tot = () => macrosOf(meals.flatMap(m => m.parts)), roleTot = r => macrosOf(meals.flatMap(m => m.parts.filter(x => x[1] === r)));
   const cap = (id, r, v) => { const u = FOOD[id].u; if (u === 'pc') return Math.min(v, id === 'egg' || id === 'eggw' ? 5 : id === 'dates' ? 7 : 4); if (u === 'tsp' || u === 'tbsp') return Math.min(v, 4); return Math.min(v, (MAXG[r] || 400) * 1.6); };
   const scale = (r, f) => meals.forEach(m => { m.parts = m.parts.map(([id, rr, v]) => rr === r ? [id, rr, cap(id, rr, v * f)] : [id, rr, v]); });
@@ -107,17 +108,19 @@ function macroSplit(k, protein, diet){ const D_ = DIETS[diet] || DIETS.balanced;
   else { fg = k * D_.fat / 9; cg = Math.max(0, (k - p * 4 - fg * 9) / 4); }
   return {p: Math.round(p), c: Math.round(cg), f: Math.round(fg)}; }
 function generateMeals(p){
-  p ||= S.profile; const c = calc(); if (!c) return null; const hr = healthRules(p), diet = resolveDiet(p, hr), avoid = dietAvoid(diet, p, hr), limit = hr.limit, budget = +p.budget || 2, pref = p.cuisine || 'x';
-  const pools = {};
-  const poolFor = s => pools[s] ||= DISH.filter(d => d.s.includes(s) && (diet === 'keto' ? (d.keto || s === 'n' && d.parts.every(([id]) => FOOD[id].tags.has('keto'))) : !d.keto || s === 'n')).map(d => adaptDish(d, avoid, limit, budget)).filter(Boolean).sort((a, b) => (a.pen - b.pen) || ((b.c === pref) - (a.c === pref)));
+  p ||= S.profile; if (p.eatMode && p.eatMode !== 'varied' && typeof generateKitchenMeals === 'function') return generateKitchenMeals(p);
+  const c = calc(); if (!c) return null; const hr = healthRules(p), diet = resolveDiet(p, hr), avoid = dietAvoid(diet, p, hr), limit = hr.limit, budget = +p.budget || 2, pref = p.cuisine || 'x';
+  const have = typeof kitchenAllowed === 'function' ? kitchenAllowed(p) : null, pools = {};
+  const poolFor = s => pools[s] ||= DISH.filter(d => d.s.includes(s) && (diet === 'keto' ? (d.keto || s === 'n' && d.parts.every(([id]) => FOOD[id].tags.has('keto'))) : !d.keto || s === 'n')).map(d => adaptDish(d, avoid, limit, budget, have)).filter(Boolean).sort((a, b) => (a.pen - b.pen) || ((b.c === pref) - (a.c === pref)));
   const days = {}, used = {};
   for (let dow = 0; dow < 7; dow++) {
     const gymDay = GYM.includes(dow), slots = mealSlots(p, diet, gymDay); let T = dayTargets(c, gymDay, diet);
     if (diet === 'if52' && (dow === 1 || dow === 4)) T = {k: c.female ? 500 : 600, p: Math.round(c.protein * 0.45), c: 40, f: 15};
     const order = (dow + 1) % 7;
     days[dow] = slots.map((sl, si) => {
-      const pool = poolFor(sl.s).length ? poolFor(sl.s) : poolFor(sl.s === 'b' ? 'l' : 'n'); if (!pool.length) return null;
       const want = {k: T.k * sl.share, p: T.p * sl.share, f: T.f * sl.share, keto: diet === 'keto'};
+      const pool = poolFor(sl.s).length ? poolFor(sl.s) : poolFor(sl.s === 'b' ? 'l' : sl.s === 'n' ? 'n' : sl.s === 'l' ? 'd' : 'l');
+      if (!pool.length) { if (!['b', 'n'].includes(sl.s) && typeof kitchenDayDish === 'function') { const kd = kitchenDayDish(p, dow); if (kd) return {...sl, ...scaleDish(kd, want), alts: [], target: Math.round(want.k)}; } return null; }
       const top = pool.filter(d => d.pen === pool[0].pen).length > 3 ? pool.filter(d => d.pen === pool[0].pen) : pool;
       const u = used[sl.s] ||= [], start = (order * 3 + si * 2 + (S.plan?.mealSeed || 0) * 5) % top.length; let pick = null;
       for (let j = 0; j < top.length; j++) { const d = top[(start + j) % top.length]; if (!u.includes(d.id)) { pick = d; break; } }
@@ -126,9 +129,10 @@ function generateMeals(p){
       const main = scaleDish(pick, want), alts = [...others.slice(rot), ...others.slice(0, rot)].slice(0, 3).map(d => scaleDish(d, want));
       return {...sl, ...main, alts, target: Math.round(want.k)};
     }).filter(Boolean);
-    balanceDay(days[dow], T, diet, avoid); days[dow].forEach(m => { m.target = Math.round(T.k * (m.share || 0)); });
+    balanceDay(days[dow], T, diet, avoid, have); days[dow].forEach(m => { m.target = Math.round(T.k * (m.share || 0)); });
   }
-  return {diet, days, created: todayISO()};
+  if (have && Object.values(days).some(d => !d.length || !d.some(m => !['b', 'n'].includes(m.s)))) { const r = generateMeals({...p, kitchen: null, eatMode: 'varied'}); if (r) r.kwarn = 'empty'; return r; }
+  return {diet, days, created: todayISO(), mode: 'varied'};
 }
 /* the meal list for a date, in the shape the Meals page uses */
 function mealsFor(iso){
