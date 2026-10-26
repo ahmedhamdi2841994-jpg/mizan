@@ -1,7 +1,7 @@
 /* ميزان — offline cache for the laptop (installed web app) */
-const CACHE = 'zad-v4';
+const CACHE = 'zad-v5';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'css/app.css', 'vendor/fonts.css', 'vendor/chart.umd.min.js',
-  'js/core.js', 'js/plan-data.js', 'js/exdb.js', 'js/exdb2.js', 'js/medkb.js', 'js/programs.js', 'js/foods.js', 'js/nutrition.js', 'js/health.js', 'js/prayer.js', 'js/adhkar.js', 'js/worship.js', 'js/notify.js', 'js/life.js', 'js/shop-data.js', 'js/shop-brands.js', 'js/stores.js', 'js/shop.js', 'js/money.js', 'js/care.js', 'js/habits.js', 'js/islamic.js', 'js/nasheed.js', 'js/library.js', 'js/news.js', 'js/games.js', 'js/chess.js', 'js/women.js', 'js/wizard.js', 'js/kitchen.js', 'js/kb.js', 'js/tools.js', 'js/trips.js', 'js/growth-data.js', 'js/stages.js', 'js/growth.js', 'js/family.js', 'js/app.js',
+  'js/core.js', 'js/plan-data.js', 'js/exdb.js', 'js/exdb2.js', 'js/medkb.js', 'js/programs.js', 'js/foods.js', 'js/nutrition.js', 'js/health.js', 'js/prayer.js', 'js/adhkar.js', 'js/worship.js', 'js/notify.js', 'js/life.js', 'js/shop-data.js', 'js/shop-brands.js', 'js/stores.js', 'js/shop.js', 'js/money.js', 'js/care.js', 'js/habits.js', 'js/islamic.js', 'js/nasheed.js', 'js/library.js', 'js/news.js', 'js/games.js', 'js/chess.js', 'js/women.js', 'js/wizard.js', 'js/kitchen.js', 'js/kb.js', 'js/tools.js', 'js/trips.js', 'js/growth-data.js', 'js/stages.js', 'js/growth.js', 'js/family.js', 'js/voice.js', 'js/assistant.js', 'js/app.js',
   'data/quran.json', 'data/adhans.json', 'data/nasheeds.json', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

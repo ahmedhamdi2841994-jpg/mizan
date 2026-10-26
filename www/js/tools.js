@@ -88,7 +88,7 @@ function sciTab(){
   let res = '', err = ''; try { res = CT.expr ? nfmt(calcEval(CT.expr, CT.deg, CT.ans)) : ''; } catch (er) { err = er.message; }
   return `<div class="two"><div class="card calc"><input type="text" id="cExpr" dir="ltr" value="${esc(CT.expr)}" placeholder="0" autocomplete="off" inputmode="none"><div class="cres" dir="ltr">${err ? `<span class="muted small">${esc(err)}</span>` : res ? '= ' + res : '&nbsp;'}</div>
     <div class="row" style="justify-content:space-between"><span class="seg"><button type="button" data-cdeg="1" aria-pressed="${CT.deg}">DEG</button><button type="button" data-cdeg="0" aria-pressed="${!CT.deg}">RAD</button></span><span class="muted small">${L('تقدر تكتب بالكيبورد كمان', 'You can type too')}</span></div>
-    <div class="ckeys">${keys.flat().map(k => `<button type="button" data-ck="${esc(k)}" class="${'=AC⌫'.includes(k) && k.length <= 2 ? 'op' : /[÷×−+^]/.test(k) ? 'op2' : /[a-z√π!%()e]/.test(k) || k === 'Ans' ? 'fn' : ''}">${esc(k)}</button>`).join('')}</div></div>
+    <div class="ckeys">${keys.flat().map(k => `<button type="button" data-ck="${esc(k)}" ${CK_AR[k] ? `aria-label="${LX(CK_AR[k])}"` : ''} class="${'=AC⌫'.includes(k) && k.length <= 2 ? 'op' : /[÷×−+^]/.test(k) ? 'op2' : /[a-z√π!%()e]/.test(k) || k === 'Ans' ? 'fn' : ''}">${esc(k)}</button>`).join('')}</div></div>
     <div class="card"><div class="head"><h2>${L('السجل', 'History')}</h2>${CT.hist.length ? `<button class="link" type="button" data-chclr="1">${L('امسح', 'Clear')}</button>` : ''}</div>${CT.hist.length ? CT.hist.slice().reverse().map(h => `<button type="button" class="chist" data-chuse="${esc(h[0])}" dir="ltr"><span>${esc(h[0])}</span><b>= ${esc(h[1])}</b></button>`).join('') : `<div class="empty">—</div>`}</div></div>`;
 }
 function shapeTab(){
@@ -124,6 +124,7 @@ function homeTab(){
     <p class="muted small">${L('أرقام تقريبية للتخطيط. الكميات الفعلية والخلطة يحددها المهندس.', 'Rough planning figures; your engineer sets the real mix and quantities.')}</p>`; }
   return `<div class="seg tabs">${[['paint', L('الدهان', 'Paint')], ['tiles', L('البلاط', 'Tiles')], ['concrete', L('الخرسانة', 'Concrete')]].map(([k, l]) => `<button type="button" data-chome="${k}" aria-pressed="${CT.home === k}">${l}</button>`).join('')}</div><div class="card form">${body}</div>`;
 }
+const CK_AR = {'×': {ar: 'ضرب', en: 'times'}, '÷': {ar: 'قسمة', en: 'divided by'}, '−': {ar: 'ناقص', en: 'minus'}, '+': {ar: 'زائد', en: 'plus'}, '=': {ar: 'يساوي', en: 'equals'}, '⌫': {ar: 'امسح رقم', en: 'backspace'}, 'AC': {ar: 'امسح الكل', en: 'clear all'}, '^': {ar: 'أُس', en: 'power'}, '√': {ar: 'جذر', en: 'square root'}, '%': {ar: 'في المية', en: 'percent'}};
 registerView('calc', {title: {ar: 'الحاسبات', en: 'Calculators'}, icon: 'calc', render(){
   const body = CT.tab === 'shape' ? shapeTab() : CT.tab === 'conv' ? convTab() : CT.tab === 'home' ? homeTab() : sciTab();
   return topbar(L('الحاسبات', 'Calculators'), L('علمية، والأشكال والأحجام والخزانات، والتحويل، وحسابات البيت', 'Scientific, shapes, volumes & tanks, unit conversion and home projects'), '', true) + tabSeg(CT.tab, [['sci', L('علمية', 'Scientific')], ['shape', L('الأشكال والأحجام', 'Shapes & volumes')], ['conv', L('تحويل الوحدات', 'Unit converter')], ['home', L('حسابات البيت', 'Home projects')]], 'data-ctab') + body;

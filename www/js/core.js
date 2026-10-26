@@ -77,7 +77,7 @@ const idb = {
 };
 
 /* ---------- shared UI ---------- */
-function toast(m){ const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
+function toast(m){ const t = $('#toast'); t.textContent = m; t.hidden = false; t.setAttribute('role', 'status'); if (typeof voiceToast === 'function') voiceToast(m); clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
 function ring(v, size, sw, color){
   const r = (size - sw) / 2, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(1, v || 0)));
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--panel-3)" stroke-width="${sw}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 ${size/2} ${size/2})"/></svg>`;
@@ -89,7 +89,7 @@ function topbar(title, sub, extra, noDate){
     ${noDate ? '' : `<div class="datebox"><button type="button" data-shift="-1" aria-label="${L('اليوم اللي قبله','Previous day')}">${prev}</button><input type="date" id="curDate" value="${CUR}" aria-label="${L('التاريخ','Date')}"><button type="button" data-shift="1" aria-label="${L('اليوم اللي بعده','Next day')}">${next}</button></div>`}</div>`;
 }
 function openSheet(html){ $('#sheetIn').innerHTML = html; $('#sheet').hidden = false; }
-function closeSheet(){ $('#sheet').hidden = true; }
+function closeSheet(){ $('#sheet').hidden = true; $('#sheet').classList.remove('ai'); }
 let timerT = null;
 function startTimer(sec){ const el = $('#timer'), v = $('#timerVal'); let left = sec; clearInterval(timerT); el.hidden = false;
   const tick = () => { v.textContent = Math.floor(left / 60) + ':' + pad2(left % 60); if (left-- <= 0) { clearInterval(timerT); el.hidden = true; beep(); toast(L('يلا المجموعة اللي جاية 💪', 'Next set, go 💪')); } }; tick(); timerT = setInterval(tick, 1000); }
@@ -188,8 +188,9 @@ function render(){
   if (openD.length) $$('.plan details').forEach((d, i) => { if (i < openD.length) d.open = openD[i]; });
   v.after && v.after();
   window.scrollTo({top: y});
+  if (typeof aiFab === 'function') aiFab();
 }
-function go(v){ if (!visibleView(v)) v = 'today'; if (VIEWS[VIEW]?.leave) VIEWS[VIEW].leave(); VIEW = v; closeSheet(); try { localStorage.setItem('mizan-view', v); } catch (e) {} renderNav(); render(); window.scrollTo({top: 0}); }
+function go(v){ if (!visibleView(v)) v = 'today'; if (VIEWS[VIEW]?.leave) VIEWS[VIEW].leave(); VIEW = v; closeSheet(); try { localStorage.setItem('mizan-view', v); } catch (e) {} renderNav(); render(); window.scrollTo({top: 0}); if (typeof voiceOnGo === 'function') voiceOnGo(v); }
 
 /* global event delegation registry */
 const H = { click: [], change: [], input: [], submit: [] };
