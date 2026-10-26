@@ -27,8 +27,9 @@ function pregnantRest(){ return false; }
 function prayersCount(iso, src){ const d = dayOf(iso, src); return PRAYER_KEYS.filter(k => d.sched?.[k]).length; }
 
 /* ---------- calculations ---------- */
-function calc(src){
-  src = src || S; const p = src.profile; if (!p || !p.height || !p.age || !p.weight) return null;
+function calc(src){ const r = calcBase(src); return r && typeof stageAdjust === 'function' ? stageAdjust(r, src || S) : r; }
+function calcBase(src){
+  src = src || S; const p = src.profile; if (!p || !p.height || p.age == null || p.age === '' || !p.weight) return null;
   const t = src.today || todayISO(), dates = Object.keys(src.days).sort();
   const weights = dates.map(d => ({d, w: num(src.days[d].weight)})).filter(x => x.w !== null && x.d <= t);
   const last7 = weights.filter(x => daysBetween(x.d, t) < 7), prev7 = weights.filter(x => { const k = daysBetween(x.d, t); return k >= 7 && k < 14; });
@@ -256,10 +257,11 @@ registerView('workout', {title: {ar: 'التمرين', en: 'Workout'}, icon: 'wo
   return topbar(L('التمرين', 'Workout'), `${WD()[dow]} · ${dShort(iso)}`) + `
   <div class="seg" role="group">${seg}</div>
   ${pregnant() ? `<div class="banner"><span>${L('أنتِ في وضع الحمل: الأوزان خفيفة، ومفيش تمارين على الضهر بعد الشهر الرابع، ووقّفي فورًا لو حسيتي بدوخة أو ألم أو نزيف. خدي موافقة دكتورتك على التمرين.', 'Pregnancy mode: keep weights light, no lying on your back after month 4, stop at once with dizziness, pain or bleeding. Get your obstetrician’s OK.')}</span></div>` : ''}
-  <div class="card"><div class="row" style="justify-content:space-between"><div style="min-width:200px"><div class="eyebrow">${L('الأسبوع', 'Week')} ${plan.week} · ${L('المرحلة', 'Phase')} ${ph.c} ${L('من 12', 'of 12')}</div><h2>${esc(plan.title)} · ${esc(ph.n)}</h2></div>
+  ${(() => { const stw = typeof stageNow === 'function' ? stageNow() : {}; return stw.kid || stw.under1 ? `<div class="card"><div class="eyebrow">${stw.ic} ${esc(stw.label)}</div><h2>${esc(plan.title)}</h2><p class="muted small" style="margin:6px 0 0">${esc(LX({ar: MOVE_BY[stw.k][0], en: MOVE_BY[stw.k][1]}))} ${L('العب معاه، والأهم إن الحركة تبقى متعة.', 'Play together; what matters is that moving is fun.')}</p></div>` : ''; })()}
+  <div class="card" ${typeof stageNow === 'function' && (stageNow().kid || stageNow().under1) ? 'hidden' : ''}><div class="row" style="justify-content:space-between"><div style="min-width:200px"><div class="eyebrow">${L('الأسبوع', 'Week')} ${plan.week} · ${L('المرحلة', 'Phase')} ${ph.c} ${L('من 12', 'of 12')}</div><h2>${esc(plan.title)} · ${esc(ph.n)}</h2></div>
     ${plan.ex.length ? `<div class="bar-prog"><i style="width:${(sc.wo || 0) * 100}%"></i></div><b class="num">${fmt((sc.wo || 0) * 100, 0)}%</b>` : ''}</div>
     <p class="muted small" style="margin:10px 0 0">${esc(ph.d)} ${['strength', 'cond'].includes(plan.k) ? L('قبل التمرين: إحماء 5–10 دقايق (مشي أو عجلة + حركات خفيفة). بعده: إطالة 5 دقايق.', 'Before: 5–10 min warm-up (walk or bike + light moves). After: 5 min stretching.') : ''} ${L('لو تعبان أو عيان: خفّف 30% أو اكتفي بالمشي.', 'If you feel unwell: drop 30% or just walk.')}</p>
-    ${S.plan?.train ? `<div class="row" style="margin-top:10px"><span class="muted small">${esc(LX(S.plan.train.name))}</span><span class="grow"></span><span class="seg"><button type="button" data-place="gym" aria-pressed="${S.profile.place === 'gym'}">🏋️ ${L('جيم', 'Gym')}</button><button type="button" data-place="home" aria-pressed="${S.profile.place === 'home'}">🏠 ${L('تمارين منزلية', 'Home workouts')}</button></span><button class="btn ghost sm" type="button" data-v="myplan">${L('تعديل البرنامج', 'Edit program')}</button></div>` : ''}</div>
+    ${S.plan?.train ? `<div class="row" style="margin-top:10px"><span class="muted small">${esc(LX(S.plan.train.name))}</span><span class="grow"></span><span class="seg"><button type="button" data-place="gym" aria-pressed="${S.profile.place === 'gym'}">🏋️ ${L('جيم', 'Gym')}</button><button type="button" data-place="home" aria-pressed="${S.profile.place === 'home'}">🏠 ${L('تمارين منزلية', 'Home workouts')}</button></span><button class="btn ghost sm" type="button" data-v="plan">${L('تعديل البرنامج', 'Edit program')}</button></div>` : ''}</div>
   ${body}`;
 }});
 on('click', e => {
@@ -269,6 +271,7 @@ on('click', e => {
 on('change', e => { const T = e.target; if (T.dataset.kg) { const [id, j] = T.dataset.kg.split('|'), iso = woDate(), dd = day(iso); dd.wo ||= {}; dd.wo[id] ||= []; const s = dd.wo[id][+j] ||= {}; s.kg = num(T.value); store.save(); return true; } });
 
 registerView('meals', {title: {ar: 'الأكل', en: 'Meals'}, icon: 'meals', render(){
+  if (typeof stageNow === 'function' && stageNow().under1) return topbar(L('الأكل', 'Meals'), stageNow().label) + `<div class="card empty"><p>${esc(LX({ar: FOOD_BY[stageNow().k][0], en: FOOD_BY[stageNow().k][1]}))}</p><button class="btn fire" type="button" data-v="growth">${L('دليل الأكل وسجل الرضاعة', 'Feeding guide & log')}</button></div>`;
   const c = calc(), list = mealsFor(CUR), d = dayOf(CUR), it = intake(CUR), gym = isGym(CUR);
   const tk = c ? (gym ? c.kTrain : c.kRest) : null, wt = c ? Math.ceil(c.water / 0.25) : 12, w = d.water || 0;
   const cards = list.map(m => {
@@ -296,7 +299,7 @@ registerView('meals', {title: {ar: 'الأكل', en: 'Meals'}, icon: 'meals', re
   </div>
   ${typeof kitchenBanner === 'function' ? kitchenBanner(CUR) : ''}
   <div class="meals">${cards}</div>
-  ${list.length ? '' : `<div class="card empty"><p>${L('لسه معملتش نظام أكلك. المعالج هيبنيه حسب جسمك وهدفك وصحتك.', 'You haven’t built your meal plan yet. The wizard builds it from your body, goal and health.')}</p><button class="btn fire" type="button" data-wiz="1">${L('ابني خطتي', 'Build my plan')}</button></div>`}
+  ${list.length ? '' : typeof stageNow === 'function' && stageNow().under1 ? `<div class="card empty"><p>${L('الرضيع أكله رضاعة (ومن 6 شهور أكل بالمعلقة). الدليل والسجل في صفحة النمو والتطور.', 'Babies feed on milk (and spoon foods from 6 months). The guide and log are on the Growth page.')}</p><button class="btn fire" type="button" data-v="growth">${L('افتح النمو والتطور', 'Open Growth')}</button></div>` : `<div class="card empty"><p>${L('لسه معملتش نظام أكلك. المعالج هيبنيه حسب جسمك وهدفك وصحتك.', 'You haven’t built your meal plan yet. The wizard builds it from your body, goal and health.')}</p><button class="btn fire" type="button" data-wiz="1">${L('ابني خطتي', 'Build my plan')}</button></div>`}
   ${(() => { const hr = healthRules(), av = [...hr.avoid, ...(S.profile.dislikes || [])].filter(t => FTAG_L[t]); return av.length ? `<p class="muted small">${L('النظام متعمل من غير', 'Built without')}: ${[...new Set(av)].map(t => LX({ar: FTAG_L[t][0], en: FTAG_L[t][1]})).join('، ')}. ${L('التفاصيل في "خطتي".', 'Details in “My plan”.')}</p>` : ''; })()}`;
 }});
 on('click', e => {
@@ -369,7 +372,7 @@ registerView('insights', {title: {ar: 'التحليلات', en: 'Insights'}, ico
   INS_SRC = src; INS_C = c;
   const days = Array.from({length: 84}, (_, i) => addDays(t, i - 83)), padN = D(days[0]).getDay();
   const heat = Array.from({length: padN}, () => '<i style="visibility:hidden"></i>').join('') + days.map(dd => { const s = scores(dd, src, c).total; const l = s === null ? 0 : s < 0.4 ? 1 : s < 0.7 ? 2 : s < 0.9 ? 3 : 4; return `<i data-l="${l}" class="${dd === t ? 'today' : ''}" title="${dShort(dd)}: ${s === null ? '—' : fmt(s * 100, 0) + '%'}"></i>`; }).join('');
-  const k = c ? [[L('الوزن الحالي', 'Current weight'), fmt(c.curW) + ` <small>${L('كجم', 'kg')}</small>`, `BMI ${fmt(c.bmi)} · ${bmiLabel(c.bmi)}`], [L('نسبة الدهون', 'Body fat'), c.bf ? fmt(c.bf) + '<small>%</small>' : '—', c.waist ? L(`الوسط ${fmt(c.waist)} سم`, `Waist ${fmt(c.waist)} cm`) : L('سجّل الوسط والرقبة', 'Log waist & neck')], [L('الحرق اليومي', 'Daily burn'), fmt(c.tdee, 0) + ` <small>${L('سعر', 'kcal')}</small>`, `BMR ${fmt(c.bmr, 0)}`], [L('معدل النزول', 'Loss rate'), c.rate === null ? '—' : fmt(c.rate) + ` <small>${L('كجم/أسبوع', 'kg/wk')}</small>`, L(`المستهدف ${fmt(c.expRate)}`, `Target ${fmt(c.expRate)}`)]] : [];
+  const k = c ? [[L('الوزن الحالي', 'Current weight'), fmt(c.curW) + ` <small>${L('كجم', 'kg')}</small>`, `BMI ${fmt(c.bmi)} · ${(c.bmiLab || bmiLabel(c.bmi))}`], [L('نسبة الدهون', 'Body fat'), c.bf ? fmt(c.bf) + '<small>%</small>' : '—', c.waist ? L(`الوسط ${fmt(c.waist)} سم`, `Waist ${fmt(c.waist)} cm`) : L('سجّل الوسط والرقبة', 'Log waist & neck')], [L('الحرق اليومي', 'Daily burn'), fmt(c.tdee, 0) + ` <small>${L('سعر', 'kcal')}</small>`, `BMR ${fmt(c.bmr, 0)}`], [L('معدل النزول', 'Loss rate'), c.rate === null ? '—' : fmt(c.rate) + ` <small>${L('كجم/أسبوع', 'kg/wk')}</small>`, L(`المستهدف ${fmt(c.expRate)}`, `Target ${fmt(c.expRate)}`)]] : [];
   const title = c && c.rate !== null ? L(`بتنزل ${fmt(c.rate)} كجم في الأسبوع`, `Losing ${fmt(c.rate)} kg per week`) + (c.eta ? L('، والوصول للهدف ', ', goal by ') + dShort(c.eta) + ' ' + D(c.eta).getFullYear() : '') : L('منحنى الوزن', 'Weight trend');
   const box = (id, h, sub) => `<div class="card"><div class="head"><h2>${h}</h2>${sub ? `<span class="muted small">${sub}</span>` : ''}</div><div class="chart"><canvas id="${id}"></canvas></div></div>`;
   return topbar(L('التحليلات', 'Insights'), preview ? L('معاينة ببيانات تجريبية', 'Preview with sample data') : L('آخر 12 أسبوع', 'Last 12 weeks'), '', true) + `

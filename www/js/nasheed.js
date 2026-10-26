@@ -17,7 +17,7 @@ async function muPlay(i){
   if (t.id) { const blob = await idb.get('nsh-' + t.id); if (!blob) { toast(L('الملف اتمسح من الجهاز.', 'The file is missing on this device.')); return; } a.src = MU.url = URL.createObjectURL(blob); } else a.src = t.src;
   NS().last = t.key; store.save(); MU.started = true;
   try { await a.play(); } catch (e) { /* needs a tap first */ }
-  if ('mediaSession' in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({title: t.name, artist: L('ميزان · أناشيد', 'Mizan · Nasheeds'), artwork: [{src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png'}]}); ['play', 'pause', 'nexttrack', 'previoustrack'].forEach(act => navigator.mediaSession.setActionHandler(act, () => act === 'play' ? a.play() : act === 'pause' ? a.pause() : act === 'nexttrack' ? muNext() : muPrev())); } catch (e) {} }
+  if ('mediaSession' in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({title: t.name, artist: L('زاد · أناشيد', 'Zad · Nasheeds'), artwork: [{src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png'}]}); ['play', 'pause', 'nexttrack', 'previoustrack'].forEach(act => navigator.mediaSession.setActionHandler(act, () => act === 'play' ? a.play() : act === 'pause' ? a.pause() : act === 'nexttrack' ? muNext() : muPrev())); } catch (e) {} }
   muUI();
 }
 function muNext(auto){ const n = MU.list.length || trackList().length; if (!n) return; if (auto && NS().repeat === 'one') return muPlay(MU.idx); if (NS().shuffle && n > 1) { let j; do { j = Math.floor(Math.random() * n); } while (j === MU.idx); return muPlay(j); } if (auto && NS().repeat === 'off' && MU.idx === n - 1) { muUI(); return; } muPlay(MU.idx + 1); }

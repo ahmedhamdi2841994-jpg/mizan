@@ -30,19 +30,37 @@ const m2t = m => { m = ((m % 1440) + 1440) % 1440; let h = Math.floor(m / 60); c
 function applyLang(){
   document.documentElement.lang = LANG; document.documentElement.dir = LANG === 'en' ? 'ltr' : 'rtl';
   $('#app').dir = document.documentElement.dir;
-  $('#logoSub').textContent = L('الصحة والأداء والعبادة', 'Health · Training · Faith');
+  renderBrand();
   $('#timerLbl').textContent = L('راحة', 'Rest'); $('#timerStop').textContent = L('تخطّي', 'Skip');
 }
 
+/* ---------- brand: زاد with two editions, يحيا (men) and بتول (women) ---------- */
+const BRAND = {men: ['#081638', '#1747D8', '#22C3F0', '#7FE3FF'], women: ['#3A1446', '#C2459B', '#FFA9C9', '#FFD6E8']};
+const EDN = {men: ['يحيا', 'Yahya'], women: ['بتول', 'Batool']};
+const edName = ed => LX({ar: EDN[ed || 'men'][0], en: EDN[ed || 'men'][1]});
+function brandMark(size, ed){
+  const c = BRAND[ed] || BRAND.men, id = 'bm' + Math.random().toString(36).slice(2, 7);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient><radialGradient id="${id}h" cx=".62" cy=".38" r=".55"><stop offset="0" stop-color="${c[3]}" stop-opacity=".55"/><stop offset="1" stop-color="${c[3]}" stop-opacity="0"/></radialGradient></defs><rect width="512" height="512" rx="116" fill="url(#${id}g)"/><rect width="512" height="512" rx="116" fill="url(#${id}h)"/><path d="M312 176 L372 160 C 418 234, 408 330, 338 392 C 280 444, 196 456, 116 424 C 210 418, 278 386, 312 330 C 344 278, 346 222, 312 176 Z" fill="#fff"/><path d="M300 66 Q 312 104 350 116 Q 312 128 300 166 Q 288 128 250 116 Q 288 104 300 66 Z" fill="#fff"/></svg>`;
+}
+function renderBrand(){
+  const ed = S?.settings?.edition || 'men', lg = document.getElementById('brandLogo'), sm = document.getElementById('splashMark');
+  if (lg) lg.innerHTML = brandMark(38, ed); if (sm && !sm.innerHTML) sm.innerHTML = brandMark(132, ed);
+  const sub = document.getElementById('logoSub'); if (sub) sub.textContent = edName(ed) + ' · ' + L('قوة وصحة وإيمان', 'Strength · Health · Faith');
+  const se = document.getElementById('splashEd'); if (se) se.textContent = edName(ed);
+}
+/* four looks: light, dark, the blue Yahya look and the pink Batool look; "auto" follows the edition */
+const THEMES = {auto: ['حسب النسخة', 'Match edition'], light: ['فاتح', 'Light'], dark: ['داكن', 'Dark'], yahya: ['أزرق يحيا', 'Yahya blue'], batool: ['بينك بتول', 'Batool pink']};
+const themeNow = () => { const t = S.settings.theme; return !t || t === 'auto' ? (S.settings.edition === 'women' ? 'batool' : 'yahya') : t; };
+
 /* ---------- state ---------- */
-const DEF_SETTINGS = { lang: 'ar', theme: 'dark', edition: 'men', city: 'riyadh', lat: 24.7136, lng: 46.6753, tz: 3, cityName: 'الرياض', country: 'sa', asr: 1, ishaRamadan: true, workEnd: '16:00', gymTime: '17:00', courseDays: [], courseTime: '20:30', courseName: '',
+const DEF_SETTINGS = { lang: 'ar', theme: 'auto', edition: 'men', city: 'riyadh', lat: 24.7136, lng: 46.6753, tz: 3, cityName: 'الرياض', country: 'sa', asr: 1, ishaRamadan: true, workEnd: '16:00', gymTime: '17:00', courseDays: [], courseTime: '20:30', courseName: '',
   notify: { prayer: true, preAdhan: 10, adhkar: true, meals: true, water: true, waterEvery: 90, tea: true, gym: true, sleep: true, weigh: true, prep: true, course: true, adhan: 'default', tasks: true, meds: true, events: true, shop: true, bills: true, habits: true, fasting: true, khatma: true, journal: false }, newsSources: null, sound: true };
 const DEF_PROFILE = { name: '', sex: 'm', age: null, height: null, weight: null, goal: null, act: 1.375, gymdays: 3, def: 0, start: todayISO(), conds: [], meds: [], allergies: [], injuries: [], dislikes: [] };
 let S = { settings: {...DEF_SETTINGS}, profile: {...DEF_PROFILE}, days: {}, labs: [], games: {}, quran: {}, adhkar: {}, women: {}, onboarded: false };
-const LS = 'mizan-app-v1';
+const LS = 'mizan-app-v1'; /* kept from the Mizan days so existing data carries over */
 const store = {
   t: null,
-  load(){ try { const r = localStorage.getItem(LS); if (!r) return; const j = JSON.parse(r); S = {...S, ...j, settings: {...DEF_SETTINGS, ...(j.settings || {}), notify: {...DEF_SETTINGS.notify, ...((j.settings || {}).notify || {})}}}; } catch (e) {} },
+  load(){ try { const r = localStorage.getItem(LS); if (!r) return; const j = JSON.parse(r); S = {...S, ...j, settings: {...DEF_SETTINGS, ...(j.settings || {}), notify: {...DEF_SETTINGS.notify, ...((j.settings || {}).notify || {})}}}; if (!S.settings.themeV4) { if (!S.settings.themeSet) S.settings.theme = 'auto'; S.settings.themeV4 = true; } } catch (e) {} },
   save(){ clearTimeout(this.t); this.t = setTimeout(() => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) { toast(L('مساحة التخزين مليانة. صدّر نسخة احتياطية وامسح القديم.', 'Storage is full. Export a backup and clear old data.')); } }, 300); },
   now(){ clearTimeout(this.t); try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
 };
@@ -67,7 +85,7 @@ function ring(v, size, sw, color){
 let CUR = todayISO();
 function topbar(title, sub, extra, noDate){
   const prev = LANG === 'en' ? '‹' : '›', next = LANG === 'en' ? '›' : '‹';
-  return `<div class="topbar"><div class="grow"><div class="eyebrow">${esc(sub || '')}</div><h1>${title}</h1></div>${extra || ''}
+  return `<div class="topbar"><div class="grow"><div class="eyebrow">${esc(sub || '')}</div><h1>${title}</h1></div>${typeof famChip === 'function' && S.onboarded ? famChip() : ''}${extra || ''}
     ${noDate ? '' : `<div class="datebox"><button type="button" data-shift="-1" aria-label="${L('اليوم اللي قبله','Previous day')}">${prev}</button><input type="date" id="curDate" value="${CUR}" aria-label="${L('التاريخ','Date')}"><button type="button" data-shift="1" aria-label="${L('اليوم اللي بعده','Next day')}">${next}</button></div>`}</div>`;
 }
 function openSheet(html){ $('#sheetIn').innerHTML = html; $('#sheet').hidden = false; }
@@ -126,6 +144,7 @@ const IC = {
   zakat: '<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  baby: '<circle cx="12" cy="8" r="5"/><path d="M10 7.5h.01M14 7.5h.01M10.5 10a2 2 0 0 0 3 0M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/>',
   pot: '<path d="M4 10h16v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M2 10h20M9 6c0-1 1-2 1-3M14 6c0-1 1-2 1-3"/>',
   calc: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8v4H8zM8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
   kb: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5M9 7h7M9 11h5"/>',
@@ -140,7 +159,7 @@ const VIEWS = {};      // id -> {render, title:{ar,en}, icon, group, women?}
 let VIEW = 'today';
 function registerView(id, def){ VIEWS[id] = def; }
 const NAV_GROUPS = [
-  {g: {ar: 'يومي', en: 'Daily'}, ids: ['today', 'plan', 'workout', 'meals', 'kitchen', 'log']},
+  {g: {ar: 'يومي', en: 'Daily'}, ids: ['today', 'plan', 'growth', 'workout', 'meals', 'kitchen', 'log']},
   {g: {ar: 'حياتي', en: 'My life'}, ids: ['planner', 'shop', 'money', 'meds', 'events', 'habits']},
   {g: {ar: 'أدوات', en: 'Tools'}, ids: ['kb', 'calc', 'routes', 'travel', 'decide']},
   {g: {ar: 'الإيمان', en: 'Faith'}, ids: ['prayer', 'adhkar', 'tasbeeh', 'quran', 'khatma', 'hijri', 'zakat']},
@@ -148,7 +167,7 @@ const NAV_GROUPS = [
   {g: {ar: 'المتابعة', en: 'Tracking'}, ids: ['women', 'insights', 'health', 'notify', 'settings']}
 ];
 const BOTTOM = ['today', 'workout', 'meals', 'prayer'];
-function visibleView(id){ const v = VIEWS[id]; return v && (!v.women || S.settings.edition === 'women' || !!S.settings.showWomen); }
+function visibleView(id){ const v = VIEWS[id]; if (!v) return false; if (v.when && !v.when()) return false; if (v.women && typeof stageNow === 'function') { const st = stageNow(); if (st.minor && (st.m ?? 999) < 108) return false; } return !v.women || S.settings.edition === 'women' || !!S.settings.showWomen; }
 function renderNav(){
   let h = '';
   NAV_GROUPS.forEach(gr => { const ids = gr.ids.filter(visibleView); if (!ids.length) return; h += `<div class="grp">${esc(LX(gr.g))}</div>` + ids.map(id => `<button type="button" data-v="${id}" ${VIEW === id ? 'aria-current="page"' : ''}>${icon(VIEWS[id].icon)}<span>${esc(LX(VIEWS[id].title))}</span></button>`).join(''); });

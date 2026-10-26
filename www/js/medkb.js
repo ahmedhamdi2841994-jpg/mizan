@@ -118,5 +118,6 @@ function healthRules(p){
   if ((p.age || 30) < 18) maxDef = Math.min(maxDef, 300);
   Object.entries(DIETS).forEach(([k, d]) => { if ((d.no || []).some(f => flags.has(f))) block.add(k); });
   if (flags.has('t1dm') || flags.has('insulin')) block.add('ramadan');
-  return {cs, ms, avoid, limit, trainAvoid, block, maxDef, proteinCap, doctor, prefer, flags};
+  const R = {cs, ms, avoid, limit, trainAvoid, block, maxDef, proteinCap, doctor, prefer, flags};
+  return typeof stageRules === 'function' ? stageRules(p, R) : R;
 }

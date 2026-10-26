@@ -1,13 +1,13 @@
 /* ميزان — مولّد نظام الأكل: بيختار النظام ويحسب الماكروز ويبني وجبات 7 أيام بالكميات، مع بدائل لكل وجبة. */
 'use strict';
 const MEAT = new Set(['chicken', 'thigh', 'mince', 'steak', 'lamb', 'liver', 'tilapia', 'hamour', 'salmon', 'shrimp', 'tuna', 'sardine', 'beefcube', 'beefbone', 'chickwhole', 'grilledchk', 'mullet', 'fishfz']);
-const GSWAP = {lactose: {milk: 'lfmilk', yogurt: 'lfyog', greek: 'lfyog', cottage: 'lfyog', butter: 'oil', labneh: 'olives', feta: 'olives', halloumi: 'tofu', cheddar: 'olives'}, gluten: {baladi: 'gfbread', pita: 'gfbread', toast: 'gfbread', pasta: 'rice', bulgur: 'rice', freekeh: 'quinoa'}, nuts: {almond: 'olives', walnut: 'olives'}, peanut: {pb: 'tahini'}, sesame: {tahini: 'oil', hummus: 'cottage'}, fodmap: {apple: 'kiwi', watermelon: 'melon', cauli: 'zucchini', honey: 'banana', avocado: 'olives', milk: 'lfmilk', yogurt: 'lfyog', greek: 'lfyog', cottage: 'lfyog', baladi: 'gfbread', pita: 'gfbread', toast: 'gfbread', pasta: 'rice', bulgur: 'rice', freekeh: 'quinoa'}, organ: {liver: 'steak'}, fava: {ful: 'cottage'}, soy: {soymilk: 'lfmilk', tofu: 'cottage'}, highK: {}, salty: {feta: 'cottage', halloumi: 'cottage', sardine: 'tuna', olives: 'avocado'}};
+const GSWAP = {choke: {almond: 'avocado', walnut: 'avocado', grapes: 'banana', olives: 'oil'}, hard: {almond: 'avocado', walnut: 'avocado', apple: 'banana', ricecake: 'oats'}, honey: {honey: 'dates'}, lactose: {milk: 'lfmilk', yogurt: 'lfyog', greek: 'lfyog', cottage: 'lfyog', butter: 'oil', labneh: 'olives', feta: 'olives', halloumi: 'tofu', cheddar: 'olives'}, gluten: {baladi: 'gfbread', pita: 'gfbread', toast: 'gfbread', pasta: 'rice', bulgur: 'rice', freekeh: 'quinoa'}, nuts: {almond: 'olives', walnut: 'olives'}, peanut: {pb: 'tahini'}, sesame: {tahini: 'oil', hummus: 'cottage'}, fodmap: {apple: 'kiwi', watermelon: 'melon', cauli: 'zucchini', honey: 'banana', avocado: 'olives', milk: 'lfmilk', yogurt: 'lfyog', greek: 'lfyog', cottage: 'lfyog', baladi: 'gfbread', pita: 'gfbread', toast: 'gfbread', pasta: 'rice', bulgur: 'rice', freekeh: 'quinoa'}, organ: {liver: 'steak'}, fava: {ful: 'cottage'}, soy: {soymilk: 'lfmilk', tofu: 'cottage'}, highK: {}, salty: {feta: 'cottage', halloumi: 'cottage', sardine: 'tuna', olives: 'avocado'}};
 function resolveDiet(p, hr){
   p ||= S.profile; hr ||= healthRules(p); const want = p.diet || 'auto';
   if (want !== 'auto' && DIETS[want] && !hr.block.has(want)) return want;
   for (const d of hr.prefer) if (DIETS[d] && !hr.block.has(d)) return d;
   const g = p.goalType || 'lose';
-  if (g === 'gain') return 'bulk'; if ((g === 'lose' || g === 'recomp') && !hr.block.has('highprotein')) return 'highprotein';
+  if (g === 'gain' && !hr.block.has('bulk')) return 'bulk'; if ((g === 'lose' || g === 'recomp') && !hr.block.has('highprotein')) return 'highprotein';
   return 'balanced';
 }
 function dietAvoid(diet, p, hr){
@@ -108,7 +108,8 @@ function macroSplit(k, protein, diet){ const D_ = DIETS[diet] || DIETS.balanced;
   else { fg = k * D_.fat / 9; cg = Math.max(0, (k - p * 4 - fg * 9) / 4); }
   return {p: Math.round(p), c: Math.round(cg), f: Math.round(fg)}; }
 function generateMeals(p){
-  p ||= S.profile; if (p.eatMode && p.eatMode !== 'varied' && typeof generateKitchenMeals === 'function') return generateKitchenMeals(p);
+  p ||= S.profile; if (typeof stageOf === 'function' && stageOf(p).under1) return null;
+  if (p.eatMode && p.eatMode !== 'varied' && typeof generateKitchenMeals === 'function') return generateKitchenMeals(p);
   const c = calc(); if (!c) return null; const hr = healthRules(p), diet = resolveDiet(p, hr), avoid = dietAvoid(diet, p, hr), limit = hr.limit, budget = +p.budget || 2, pref = p.cuisine || 'x';
   const have = typeof kitchenAllowed === 'function' ? kitchenAllowed(p) : null, pools = {};
   const poolFor = s => pools[s] ||= DISH.filter(d => d.s.includes(s) && (diet === 'keto' ? (d.keto || s === 'n' && d.parts.every(([id]) => FOOD[id].tags.has('keto'))) : !d.keto || s === 'n')).map(d => adaptDish(d, avoid, limit, budget, have)).filter(Boolean).sort((a, b) => (a.pen - b.pen) || ((b.c === pref) - (a.c === pref)));

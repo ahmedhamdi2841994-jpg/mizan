@@ -28,6 +28,16 @@ const PRI = {
   trap: ['db_shrug', 'bb_shrug', 'band_shrug'],
   cardio: ['incline_walk', 'bike', 'elliptical', 'rowing', 'outdoor_walk', 'cycling', 'swim', 'treadmill_run', 'run', 'stairs', 'march'],
   hiit: ['mountain', 'jacks', 'high_knees', 'burpee', 'jump_squat', 'skater', 'bear_crawl', 'shadow_box', 'jump_rope', 'box_jump', 'tuck_jump', 'battle_rope', 'sprint'],
+  sleg: ['chair_stand', 'seated_leg_ext', 'wall_slide', 'seated_heel'],
+  spush: ['wc_dip', 'wall_pushup', 'chair_pushup', 'incline_pushup'],
+  spull: ['seated_row_band', 'wc_row', 'seated_row_bw'],
+  sarm: ['seated_press', 'wc_press', 'seated_curl', 'seated_raise', 'seated_tri'],
+  score: ['seated_brace', 'seated_twist'],
+  scardio: ['seated_march', 'wc_push', 'seated_punch', 'wc_punch'],
+  bal: ['sl_stand', 'tandem_stand', 'side_leg_stand', 'back_leg_stand', 'heel_toe_raise', 'heel_toe_walk'],
+  breath: ['diaphragm', 'kegel', 'heel_slide', 'pelvic_tilt', 'side_breath', 'toe_tap'],
+  play: ['active_play', 'tag_run', 'ball_throw', 'kick_ball', 'hopscotch', 'animal_walk', 'frog_jump', 'skip_play', 'line_walk'],
+  baby: ['tummy_time', 'floor_play', 'crawl_play'],
   mob: ['cat_cow', 'world_stretch', 'hip_flexor', 'ham_stretch', 'thoracic_rot', 'child_pose', 'down_dog', 'cobra', 'quad_stretch', 'calf_stretch', 'butterfly', 'chest_stretch']
 };
 const DAYT = {
@@ -46,7 +56,22 @@ const DAYT = {
   cond: {t: ['دايرة حرق', 'Conditioning circuit'], s: ['hiit', 'squat:1', 'hpush:1', 'hpull:1', 'lunge:1', 'hiit:1', 'core'], circuit: 1},
   cardio: {t: ['كارديو وبطن', 'Cardio & core'], s: ['cardio', 'core:1', 'rot', 'mob'], k: 'cardio'},
   mobility: {t: ['حركة وإطالة', 'Mobility & stretching'], s: ['mob', 'mob:1', 'mob:2', 'mob:3', 'cardio:1'], k: 'cardio'},
-  prenatal: {t: ['حركة آمنة للحمل', 'Pregnancy-safe session'], s: ['squat', 'hpull', 'hpush', 'glute', 'core', 'cardio'], k: 'strength'}
+  prenatal: {t: ['حركة آمنة للحمل', 'Pregnancy-safe session'], s: ['squat', 'hpull', 'hpush', 'glute', 'breath', 'core', 'cardio'], k: 'strength'},
+  senA: {t: ['قوة وتوازن A', 'Strength & balance A'], s: ['sleg', 'spush', 'hpull', 'bal', 'glute', 'bal:1', 'core']},
+  senB: {t: ['قوة وتوازن B', 'Strength & balance B'], s: ['sleg:1', 'spull', 'spush:1', 'bal:2', 'calf', 'bal:3', 'rot']},
+  chairA: {t: ['تمارين الكرسي A', 'Chair session A'], s: ['sleg', 'spull', 'spush', 'sarm', 'sleg:1', 'score', 'scardio']},
+  chairB: {t: ['تمارين الكرسي B', 'Chair session B'], s: ['sleg:2', 'spull:1', 'sarm:1', 'sarm:2', 'sleg:3', 'score:1', 'scardio:1']},
+  balance: {t: ['توازن بسند', 'Supported balance'], s: ['bal', 'bal:1', 'bal:2', 'bal:3', 'sleg', 'mob']},
+  wcA: {t: ['الكرسي المتحرك A', 'Wheelchair session A'], s: ['spull', 'spush', 'sarm', 'scardio', 'spull:1', 'sarm:1', 'score']},
+  wcB: {t: ['الكرسي المتحرك B', 'Wheelchair session B'], s: ['scardio:1', 'sarm:2', 'spull', 'sarm:3', 'score:1', 'spush']},
+  post1: {t: ['تعافي بعد الولادة', 'Postnatal recovery'], s: ['breath', 'breath:1', 'breath:2', 'mob', 'cardio'], k: 'cardio'},
+  post2: {t: ['رجوع بالتدريج بعد الولادة', 'Gradual postnatal return'], s: ['glute', 'squat', 'hpull', 'hpush', 'breath', 'breath:2', 'cardio']},
+  kidsA: {t: ['لعب وحركة', 'Active play'], s: ['play', 'play:1', 'play:2', 'bal'], k: 'cond'},
+  kidsB: {t: ['لعب وتقوية', 'Play & strength'], s: ['play:3', 'play:4', 'squat', 'hpush', 'core'], k: 'cond'},
+  tots: {t: ['لعب الأطفال', 'Active play'], s: ['play', 'play:1', 'play:2', 'play:8'], k: 'cond'},
+  infant: {t: ['حركة الرضيع', 'Baby movement'], s: ['baby', 'baby:1', 'baby:2'], k: 'cond'},
+  simpleA: {t: ['تمرين بسيط', 'Simple session'], s: ['squat', 'hpush', 'hpull', 'bal', 'cardio']},
+  lowerOnly: {t: ['رجل وجذع', 'Legs & core'], s: ['squat', 'lunge', 'glute', 'calf', 'core', 'cardio']}
 };
 const SPLITS = {
   full2: {ar: 'جسم كامل يومين', en: 'Full body · 2 days', days: ['fullA', 'fullB']},
@@ -61,15 +86,33 @@ const SPLITS = {
   ul6: {ar: 'علوي · سفلي × 2 + حرق', en: 'Upper/Lower × 2 + conditioning', days: ['upA', 'loA', 'cond', 'upB', 'loB', 'cond']},
   str4: {ar: 'قوة 4 أيام', en: 'Strength · 4 days', days: ['strA', 'upB', 'strB', 'loB']},
   health3: {ar: 'صحة ولياقة عامة', en: 'General health & fitness', days: ['fullA', 'cardio', 'fullB', 'mobility', 'fullC']},
-  prenatal: {ar: 'برنامج الحمل الآمن', en: 'Safe pregnancy program', days: ['prenatal', 'mobility', 'prenatal']}
+  prenatal: {ar: 'برنامج الحمل الآمن', en: 'Safe pregnancy program', days: ['prenatal', 'mobility', 'prenatal']},
+  senior: {ar: 'قوة وتوازن لكبار السن', en: 'Strength & balance for older adults', days: ['senA', 'senB', 'senA', 'balance']},
+  elderBal: {ar: 'الكرسي والتوازن', en: 'Chair & balance', days: ['chairA', 'balance', 'chairB']},
+  chair: {ar: 'برنامج الكرسي', en: 'Chair program', days: ['chairA', 'chairB']},
+  wheel: {ar: 'برنامج الكرسي المتحرك', en: 'Wheelchair program', days: ['wcA', 'wcB']},
+  post1: {ar: 'تعافي بعد الولادة (أول 6 أسابيع)', en: 'Postnatal recovery (first 6 weeks)', days: ['post1']},
+  post2: {ar: 'رجوع بعد الولادة (6–12 أسبوع)', en: 'Postnatal return (6–12 weeks)', days: ['post2', 'post1']},
+  kids: {ar: 'لعب وحركة للأطفال', en: 'Kids’ active play', days: ['kidsA', 'kidsB']},
+  tots: {ar: 'لعب الأطفال الصغيرين', en: 'Little ones’ play', days: ['tots']},
+  infant: {ar: 'حركة الرضيع', en: 'Baby movement', days: ['infant']},
+  teen: {ar: 'برنامج المراهقين', en: 'Teen program', days: ['fullA', 'fullB', 'fullC']},
+  simple: {ar: 'برنامج بسيط', en: 'Simple program', days: ['simpleA']},
+  lower: {ar: 'رجل وجذع', en: 'Legs & core', days: ['lowerOnly']}
 };
+const SPECIAL_SPLITS = new Set(['prenatal', 'senior', 'elderBal', 'chair', 'wheel', 'post1', 'post2', 'kids', 'tots', 'infant', 'teen', 'simple', 'lower']);
 const DEFAULT_DAYS = {1: [6], 2: [6, 2], 3: [6, 1, 3], 4: [6, 0, 2, 3], 5: [6, 0, 1, 2, 3], 6: [6, 0, 1, 2, 3, 4]};
 function trainCtx(p){
   p ||= S.profile; const hr = healthRules(p), place = p.place || 'gym';
   const have = new Set(['none', 'mat', 'bench', 'box']); if (place === 'gym') Object.keys(EQ).forEach(k => have.add(k)); else (p.homeEq || []).forEach(k => have.add(k));
-  return {place, have, avoid: hr.trainAvoid, lvl: +p.level || 1, goal: p.goalType || 'lose', female: p.sex === 'f', hr};
+  const st = typeof stageOf === 'function' ? stageOf(p) : {k: 'adult'}, ab = p.abil || [];
+  if (ab.includes('upperlimb')) ['db', 'kb', 'bb', 'band', 'cable', 'bar'].forEach(k => have.delete(k));
+  if (st.kid || st.under1) [...have].forEach(k => { if (!['none', 'mat', 'bench', 'box'].includes(k)) have.delete(k); });
+  const lvl = st.minor && st.k !== 'teen' || st.older || ab.includes('intellectual') || ab.includes('neuro') ? 1 : st.k === 'teen' ? Math.min(2, +p.level || 1) : +p.level || 1;
+  return {place, have, avoid: hr.trainAvoid, lvl, goal: p.goalType || 'lose', female: p.sex === 'f', hr, st, wheel: ab.includes('wheelchair'), noArms: ab.includes('upperlimb'), kid: !!st.kid && !st.under1, baby: !!st.under1};
 }
-function exAllowed(id, ctx){ ctx = typeof ctx === 'string' || !ctx ? trainCtx() : ctx; const e = EX[id]; if (!e) return false; if (!(e.eqk || ['none']).every(k => ctx.have.has(k))) return false; if ((e.avoid || []).some(a => ctx.avoid.has(a))) return false; return true; }
+const ARM_SLOTS = new Set(['hpush', 'vpush', 'chest', 'hpull', 'vpull', 'rear', 'side', 'bi', 'tri', 'trap', 'spush', 'spull', 'sarm']);
+function exAllowed(id, ctx){ ctx = typeof ctx === 'string' || !ctx ? trainCtx() : ctx; const e = EX[id]; if (!e) return false; if ((e.wc && !ctx.wheel) || (e.kid && !ctx.kid) || (e.baby && !ctx.baby) || (ctx.wheel && (!e.seated || e.legs)) || (ctx.noArms && ARM_SLOTS.has(e.sl))) return false; if (!(e.eqk || ['none']).every(k => ctx.have.has(k))) return false; if ((e.avoid || []).some(a => ctx.avoid.has(a))) return false; return true; }
 function pickEx(slot, n, ctx, used){
   const list = (PRI[slot] || []).filter(id => exAllowed(id, ctx));
   const lvlOk = list.filter(id => (EX[id].lvl || 1) <= ctx.lvl + (ctx.lvl === 1 ? 0 : 1));
@@ -79,8 +122,18 @@ function pickEx(slot, n, ctx, used){
 }
 function chooseSplit(p){
   const g = p.goalType || 'lose', n = Math.max(1, Math.min(6, (p.trainDays || []).length || 3)), lvl = +p.level || 1;
+  const st = typeof stageOf === 'function' ? stageOf(p) : {k: 'adult'}, ab = p.abil || [], pp = S.women?.ppWeeks ?? 99;
+  if (st.under1) return 'infant'; if (st.k === 'toddler' || st.k === 'preschool') return 'tots'; if (st.k === 'child') return 'kids';
+  if (ab.includes('wheelchair')) return 'wheel';
   if (p.sex === 'f' && S.women?.mode === 'pregnant') return 'prenatal';
+  if (st.k === 'post' && pp < 6) return 'post1'; if (st.k === 'post' && pp < 12) return 'post2';
   if (p.program && p.program !== 'auto' && SPLITS[p.program]) return p.program;
+  if (ab.includes('neuro') || ab.includes('lowerlimb')) return 'chair';
+  if (st.k === 'elder' || p.aid === 'walker') return 'elderBal';
+  if (st.older) return p.aid === 'cane' || p.fell ? 'elderBal' : 'senior';
+  if (ab.includes('intellectual')) return 'simple';
+  if (ab.includes('upperlimb')) return 'lower';
+  if (st.k === 'teen') return 'teen';
   if (n <= 2) return 'full2';
   if (n === 3) return g === 'strength' && lvl >= 2 ? 'str3' : g === 'gain' && lvl >= 2 ? 'ppl3' : 'full3';
   if (n === 4) return g === 'strength' ? 'str4' : 'ul4';
@@ -97,6 +150,14 @@ const REPS = {
 };
 function setScheme(id, i, goal, lvl, circuit, preg){
   const e = EX[id], sl = e.sl;
+  if (sl === 'baby') return [1, {ar: 'كذا مرة في اليوم، دقايق قليلة كل مرة', en: 'Several short sessions a day'}, 0];
+  if (sl === 'play') return [1, {ar: '15–20 دقيقة', en: '15–20 min'}, 0];
+  if (sl === 'bal') return [2, {ar: '20–30 ث لكل رجل', en: '20–30 s each leg'}, 30];
+  if (sl === 'breath') return [2, {ar: '8–10 مرات', en: '8–10 reps'}, 30];
+  if (id === 'wc_push') return [1, {ar: '10–20 دقيقة', en: '10–20 min'}, 0];
+  if (sl === 'scardio') return [3, {ar: '30 ث شغل / 30 ث راحة', en: '30 s on / 30 s off'}, 30];
+  if (['sleg', 'spush', 'spull', 'sarm', 'score'].includes(sl)) return [2, {ar: '10–12', en: '10–12'}, 60];
+  if (e.kid) return [1, {ar: '10–15 دقيقة', en: '10–15 min'}, 0];
   if (sl === 'cardio') return [1, {ar: goal === 'lose' ? '30–40 دقيقة' : '20–30 دقيقة', en: goal === 'lose' ? '30–40 min' : '20–30 min'}, 0];
   if (sl === 'hiit') return circuit ? [3, {ar: '40 ث شغل / 20 ث راحة', en: '40 s on / 20 s off'}, 20] : [1, {ar: '8 جولات: 30 ث شغل / 30 ث راحة', en: '8 rounds: 30 s on / 30 s off'}, 0];
   if (sl === 'mob') return [2, {ar: '30–45 ث', en: '30–45 s'}, 15];
@@ -110,7 +171,7 @@ function setScheme(id, i, goal, lvl, circuit, preg){
   return [s, r, rest];
 }
 const cardioMin = r => { const m = String(r?.en || r || '').match(/(\d+)\s*min/); return m ? +m[1] : 30; };
-const exMinutes = ex => ex.reduce((m, [id, s, r, rest]) => m + (EX[id].sl === 'cardio' ? cardioMin(r) : EX[id].sl === 'hiit' && s === 1 ? 8 : s * (45 + rest) / 60 + 1), 0);
+const exMinutes = ex => ex.reduce((m, [id, s, r, rest]) => m + (EX[id].sl === 'baby' ? 5 : ['cardio', 'play'].includes(EX[id].sl) || (EX[id].sl === 'scardio' && s === 1) ? cardioMin(r) : EX[id].sl === 'hiit' && s === 1 ? 8 : s * (45 + rest) / 60 + 1), 0);
 function buildDay(key, ctx, minutes, goal){
   const T = DAYT[key], used = new Set(), ex = [], preg = ctx.avoid.has('preg');
   T.s.forEach(sl => { const [slot, n] = sl.split(':'); const id = pickEx(slot, +(n || 0), ctx, used); if (!id) return; used.add(id); ex.push(id); });
@@ -126,12 +187,13 @@ function buildDay(key, ctx, minutes, goal){
 }
 function generateProgram(p){
   p ||= S.profile; const ctx = trainCtx(p), split = chooseSplit(p), sp = SPLITS[split];
-  let days = (p.trainDays && p.trainDays.length ? p.trainDays : DEFAULT_DAYS[sp.days.length] || DEFAULT_DAYS[3]).slice().sort((a, b) => ((a + 1) % 7) - ((b + 1) % 7));
-  const minutes = +p.minutes || 60, goal = p.goalType || 'lose', out = {};
+  const st = ctx.st || {};
+  let days = (st.kid || st.under1 ? [6, 0, 1, 2, 3, 4, 5] : p.trainDays && p.trainDays.length ? p.trainDays : DEFAULT_DAYS[sp.days.length] || DEFAULT_DAYS[3]).slice().sort((a, b) => ((a + 1) % 7) - ((b + 1) % 7));
+  const minutes = st.under1 ? 30 : +p.minutes || 60, goal = st.minor || st.older || SPECIAL_SPLITS.has(split) && split !== 'teen' ? 'health' : st.k === 'teen' && !['health', 'fitness'].includes(p.goalType) ? 'fitness' : p.goalType || 'lose', out = {};
   const keys = sp.days; days.forEach((dow, i) => { out[dow] = buildDay(keys[i % keys.length], ctx, minutes, goal); });
   const rest = [0, 1, 2, 3, 4, 5, 6].filter(d => !days.includes(d));
   const walkDays = goal === 'lose' || goal === 'recomp' || goal === 'health' || goal === 'fitness' ? rest.filter(d => d !== 5).slice(0, 2) : [];
-  rest.forEach(d => { out[d] = walkDays.includes(d) ? {t: {ar: 'مشي خفيف', en: 'Easy walk'}, k: 'walk', key: 'walk', ex: [[exAllowed('outdoor_walk', ctx) ? 'outdoor_walk' : 'march', 1, minutes >= 55 ? {ar: '30–45 دقيقة', en: '30–45 min'} : {ar: `${Math.max(20, minutes - 10)} دقيقة`, en: `${Math.max(20, minutes - 10)} min`}, 0]]} : {t: {ar: 'راحة', en: 'Rest'}, k: 'rest', key: 'rest', ex: []}; });
+  rest.forEach(d => { out[d] = walkDays.includes(d) ? {t: ctx.wheel ? {ar: 'دفع الكرسي خفيف', en: 'Easy wheeling'} : {ar: 'مشي خفيف', en: 'Easy walk'}, k: 'walk', key: 'walk', ex: [[ctx.wheel ? 'wc_push' : (p.abil || []).some(x => ['neuro', 'lowerlimb'].includes(x)) ? 'seated_march' : exAllowed('outdoor_walk', ctx) ? 'outdoor_walk' : 'march', 1, minutes >= 55 ? {ar: '30–45 دقيقة', en: '30–45 min'} : {ar: `${Math.max(20, minutes - 10)} دقيقة`, en: `${Math.max(20, minutes - 10)} min`}, 0]]} : {t: {ar: 'راحة', en: 'Rest'}, k: 'rest', key: 'rest', ex: []}; });
   return {split, name: {ar: sp.ar, en: sp.en}, days: out, place: ctx.place, created: todayISO()};
 }
 function applyProgram(prog){ PROG = prog.days; GYM = Object.keys(prog.days).map(Number).filter(d => ['strength', 'cond', 'cardio'].includes(prog.days[d].k)); }

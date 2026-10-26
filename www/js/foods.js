@@ -51,18 +51,18 @@ FD('baladi', 'عيش بلدي', 'Baladi bread', 266, 9.8, 55, 2.6, 'pc', 100, 'g
 FD('pita', 'خبز عربي', 'Arabic bread', 275, 9, 55.7, 1.2, 'pc', 70, 'gluten gi_high fodmap', 1);
 FD('toast', 'توست أسمر', 'Brown toast', 265, 11, 46, 3.5, 'pc', 28, 'gluten fodmap', 1);
 FD('gfbread', 'عيش خالي من الجلوتين', 'Gluten-free bread', 250, 4, 48, 5, 'pc', 35, '', 3);
-FD('ricecake', 'كعك أرز', 'Rice cakes', 387, 8, 81, 3, 'pc', 9, 'gi_high', 1);
+FD('ricecake', 'كعك أرز', 'Rice cakes', 387, 8, 81, 3, 'pc', 9, 'gi_high hard', 1);
 FD('bulgur', 'برغل مطبوخ', 'Cooked bulgur', 83, 3.1, 18.6, 0.2, 'g', 1, 'gluten fiber fodmap', 1);
 FD('quinoa', 'كينوا مطبوخة', 'Cooked quinoa', 120, 4.4, 21.3, 1.9, 'g', 1, '', 3);
 FD('freekeh', 'فريك مطبوخ', 'Cooked freekeh', 110, 4.5, 21, 0.8, 'g', 1, 'gluten fiber fodmap', 2);
 /* fruit */
 FD('banana', 'موز', 'Banana', 89, 1.1, 22.8, 0.3, 'pc', 120, 'highK', 1);
-FD('apple', 'تفاح', 'Apple', 52, 0.3, 13.8, 0.2, 'pc', 180, 'fodmap', 1);
+FD('apple', 'تفاح', 'Apple', 52, 0.3, 13.8, 0.2, 'pc', 180, 'fodmap hard', 1);
 FD('orange', 'برتقال', 'Orange', 47, 0.9, 11.8, 0.1, 'pc', 150, 'citrus highK', 1);
 FD('dates', 'تمر', 'Dates', 282, 2.5, 75, 0.4, 'pc', 10, 'sugar highK gi_high', 1);
 FD('straw', 'فراولة', 'Strawberries', 32, 0.7, 7.7, 0.3, 'g', 1, 'keto', 2);
 FD('berries', 'توت', 'Berries', 50, 0.8, 12, 0.3, 'g', 1, 'keto', 3);
-FD('grapes', 'عنب', 'Grapes', 69, 0.7, 18, 0.2, 'g', 1, '', 1);
+FD('grapes', 'عنب', 'Grapes', 69, 0.7, 18, 0.2, 'g', 1, 'choke', 1);
 FD('kiwi', 'كيوي', 'Kiwi', 61, 1.1, 14.7, 0.5, 'pc', 75, '', 2);
 FD('guava', 'جوافة', 'Guava', 68, 2.6, 14.3, 1, 'pc', 100, '', 1);
 FD('melon', 'شمام', 'Cantaloupe', 34, 0.8, 8.2, 0.2, 'g', 1, '', 1);
@@ -91,11 +91,11 @@ FD('ghee', 'سمنة', 'Ghee', 900, 0, 0, 100, 'tsp', 4.5, 'keto fat satfat', 1)
 FD('butter', 'زبدة', 'Butter', 717, 0.9, 0.1, 81, 'tsp', 5, 'keto fat satfat lactose', 1);
 FD('tahini', 'طحينة', 'Tahini', 595, 17, 21, 54, 'tbsp', 15, 'sesame fat keto', 1);
 FD('pb', 'زبدة فول سوداني', 'Peanut butter', 588, 25, 20, 50, 'tbsp', 16, 'peanut fat', 2);
-FD('almond', 'لوز', 'Almonds', 579, 21, 22, 50, 'g', 1, 'nuts fat keto oxalate', 2);
-FD('walnut', 'عين جمل', 'Walnuts', 654, 15, 14, 65, 'g', 1, 'nuts fat keto omega', 3);
+FD('almond', 'لوز', 'Almonds', 579, 21, 22, 50, 'g', 1, 'nuts fat keto oxalate choke hard', 2);
+FD('walnut', 'عين جمل', 'Walnuts', 654, 15, 14, 65, 'g', 1, 'nuts fat keto omega choke hard', 3);
 FD('avocado', 'أفوكادو', 'Avocado', 160, 2, 8.5, 14.7, 'g', 1, 'fat keto highK fodmap', 3);
-FD('olives', 'زيتون', 'Olives', 115, 0.8, 6, 10.7, 'g', 1, 'fat keto salty', 1);
-FD('honey', 'عسل نحل', 'Honey', 304, 0.3, 82, 0, 'tsp', 7, 'sugar fodmap', 1);
+FD('olives', 'زيتون', 'Olives', 115, 0.8, 6, 10.7, 'g', 1, 'fat keto salty choke', 1);
+FD('honey', 'عسل نحل', 'Honey', 304, 0.3, 82, 0, 'tsp', 7, 'sugar fodmap honey', 1);
 /* tags helpers */
 const FTAG_L = {lactose: ['ألبان باللاكتوز', 'Dairy with lactose'], egg: ['بيض', 'Eggs'], gluten: ['قمح وجلوتين', 'Gluten'], fish: ['سمك', 'Fish'], seafood: ['مأكولات بحرية', 'Shellfish'], nuts: ['مكسرات', 'Tree nuts'], peanut: ['فول سوداني', 'Peanuts'], sesame: ['سمسم وطحينة', 'Sesame'], soy: ['صويا', 'Soy'], legume: ['بقوليات', 'Legumes'], fava: ['فول', 'Fava beans'], redmeat: ['لحوم حمرا', 'Red meat'], organ: ['كبدة', 'Liver']};
 const ALLERGENS = ['lactose', 'egg', 'gluten', 'fish', 'seafood', 'nuts', 'peanut', 'sesame', 'soy'];

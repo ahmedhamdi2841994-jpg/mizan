@@ -29,6 +29,8 @@ function reminderPlan(days = 5){
     if (typeof womenReminders === 'function') womenReminders(iso, push);
     if (typeof lifeReminders === 'function') lifeReminders(iso, push);
     if (typeof kitchenReminders === 'function') kitchenReminders(iso, push);
+    if (typeof famReminders === 'function') famReminders(iso, push);
+    if (typeof babyReminders === 'function') babyReminders(iso, push);
   }
   return out.sort((a, b) => a.when - b.when);
 }
@@ -118,8 +120,8 @@ on('click', async e => {
   }
   if (id === 'nTest') {
     const ln = LN();
-    if (ln) { await ln.schedule({notifications: [{id: 7, title: L('تجربة تنبيه من ميزان', 'Test from Mizan'), body: L('التنبيهات شغالة ✅', 'Reminders work ✅'), channelId: 'remind', schedule: {at: new Date(Date.now() + 5000), allowWhileIdle: true}}]}); toast(L('هيوصلك تنبيه بعد 5 ثواني. اقفل التطبيق لو حابب تجرب.', 'A test arrives in 5 seconds. Close the app to try it.')); }
-    else { if ('Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch (er) {} } if ('Notification' in window && Notification.permission === 'granted') new Notification(L('تجربة تنبيه من ميزان', 'Test from Mizan'), {body: L('التنبيهات شغالة ✅', 'Reminders work ✅')}); beep(); toast(L('التنبيهات شغالة ✅', 'Reminders work ✅')); }
+    if (ln) { await ln.schedule({notifications: [{id: 7, title: L('تجربة تنبيه من زاد', 'Test from Zad'), body: L('التنبيهات شغالة ✅', 'Reminders work ✅'), channelId: 'remind', schedule: {at: new Date(Date.now() + 5000), allowWhileIdle: true}}]}); toast(L('هيوصلك تنبيه بعد 5 ثواني. اقفل التطبيق لو حابب تجرب.', 'A test arrives in 5 seconds. Close the app to try it.')); }
+    else { if ('Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch (er) {} } if ('Notification' in window && Notification.permission === 'granted') new Notification(L('تجربة تنبيه من زاد', 'Test from Zad'), {body: L('التنبيهات شغالة ✅', 'Reminders work ✅')}); beep(); toast(L('التنبيهات شغالة ✅', 'Reminders work ✅')); }
     return true;
   }
 });

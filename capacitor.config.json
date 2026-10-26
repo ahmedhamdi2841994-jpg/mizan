@@ -1,10 +1,10 @@
 {
   "appId": "com.mizan.personal",
-  "appName": "ميزان",
+  "appName": "زاد",
   "webDir": "www",
-  "android": { "allowMixedContent": false, "backgroundColor": "#0b0d10" },
+  "android": { "allowMixedContent": false, "backgroundColor": "#071026" },
   "plugins": {
     "CapacitorHttp": { "enabled": true },
-    "LocalNotifications": { "iconColor": "#FF7A2F" }
+    "LocalNotifications": { "iconColor": "#1747D8" }
   }
 }

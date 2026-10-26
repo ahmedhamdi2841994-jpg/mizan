@@ -188,7 +188,8 @@ const BAG = [['أوراق الهوية وملف المتابعة', 'ID and pregn
 let WTAB = null;
 registerView('women', {women: true, title: {ar: 'صحة المرأة', en: 'Women’s health'}, icon: 'women', render(){
   updateWomen(); const w = S.women, mode = w.mode || 'normal', tab = WTAB || 'main';
-  const modeSeg = `<div class="seg">${[['normal', L('عادي', 'Regular')], ['pregnant', L('حامل', 'Pregnant')], ['postpartum', L('بعد الولادة', 'Postpartum')]].map(([k, l]) => `<button type="button" data-wmode="${k}" aria-pressed="${k === mode}">${l}</button>`).join('')}</div>`;
+  const minorW = typeof stageNow === 'function' && stageNow().minor;
+  const modeSeg = minorW ? '' : `<div class="seg">${[['normal', L('عادي', 'Regular')], ['pregnant', L('حامل', 'Pregnant')], ['postpartum', L('بعد الولادة', 'Postpartum')]].map(([k, l]) => `<button type="button" data-wmode="${k}" aria-pressed="${k === mode}">${l}</button>`).join('')}</div>`;
   const flags = (list) => { const d = dayOf(todayISO()).pw || {}; return `<div class="chips danger">${list.map(([k, l]) => `<button type="button" data-pw="${k}" aria-pressed="${!!d[k]}">${l}</button>`).join('')}</div>`; };
   let body = '';
   if (mode === 'normal') body = cycleView();
